@@ -1,0 +1,416 @@
+{
+  "name": "TracePro",
+  "version": 1,
+  "color": {
+    "themes": [
+      {
+        "id": "light",
+        "name": "Claro"
+      },
+      {
+        "id": "dark",
+        "name": "Escuro"
+      }
+    ],
+    "tokens": [
+      {
+        "name": "primary",
+        "value": {
+          "light": "#265267",
+          "dark": "#8DBBD0"
+        },
+        "usage": "Botão principal, títulos de marca, links e estado ativo. Como texto: sobre surface e content-bg nos dois temas."
+      },
+      {
+        "name": "on-primary",
+        "value": {
+          "light": "#ffffff",
+          "dark": "#10222B"
+        },
+        "usage": "Texto e ícones sobre preenchimento primary."
+      },
+      {
+        "name": "primary-soft",
+        "value": {
+          "light": "#BCD2DD",
+          "dark": "#2C4F60"
+        },
+        "usage": "Botão secundário, fundo de ícones de dados, segmento ativo. Texto sobre ele: text."
+      },
+      {
+        "name": "sidebar",
+        "value": {
+          "light": "#265267",
+          "dark": "#2E6078"
+        },
+        "usage": "Sidebar web e header mobile. Texto sobre ela: branco."
+      },
+      {
+        "name": "content-bg",
+        "value": {
+          "light": "#C8E1ED",
+          "dark": "#193A4A"
+        },
+        "usage": "Fundo da área de conteúdo; também o item ativo da sidebar, que se funde com o conteúdo."
+      },
+      {
+        "name": "surface",
+        "value": {
+          "light": "#F6FAFD",
+          "dark": "#121212"
+        },
+        "usage": "Cards, tabelas, header web, modais. A separação vem da cor, não de sombra."
+      },
+      {
+        "name": "surface-muted",
+        "value": {
+          "light": "#D4E0E7",
+          "dark": "#2A3E48"
+        },
+        "usage": "Cabeçalho de tabela, campos, tag NÃO-BLOCANTE, trilhas de progresso."
+      },
+      {
+        "name": "text",
+        "value": {
+          "light": "#1E2F38",
+          "dark": "#EEF3F6"
+        },
+        "usage": "Texto principal sobre surface, content-bg e surface-muted."
+      },
+      {
+        "name": "text-secondary",
+        "value": {
+          "light": "#5B6B75",
+          "dark": "#A9BAC3"
+        },
+        "usage": "Rótulos e metadados sobre surface (5.4:1). Evite sobre content-bg claro (4.3:1)."
+      },
+      {
+        "name": "line",
+        "value": {
+          "light": "#D4E0E7",
+          "dark": "#2F4450"
+        },
+        "usage": "Divisórias finas entre linhas de tabela e bordas de cards de leitura."
+      },
+      {
+        "name": "data",
+        "value": {
+          "light": "#547C90",
+          "dark": "#6E97AB"
+        },
+        "usage": "Série principal de gráficos, barras e progresso."
+      },
+      {
+        "name": "data-light",
+        "value": {
+          "light": "#B7CCD6",
+          "dark": "#B7CCD6"
+        },
+        "usage": "Série secundária, fatia clara da pizza, trilho da linha do tempo."
+      },
+      {
+        "name": "accent",
+        "value": {
+          "light": "#C2703D",
+          "dark": "#D98A57"
+        },
+        "usage": "Terracota: sublinhado de aba ativa, borda do card de alerta, marcadores e FAB. Como texto só a partir de 18px (3.6:1); para texto menor use accent-text."
+      },
+      {
+        "name": "accent-text",
+        "value": {
+          "light": "#9E5528",
+          "dark": "#E9A277"
+        },
+        "usage": "Texto terracota em tamanho normal (aba ativa, status Pendente) sobre surface ou accent-bg."
+      },
+      {
+        "name": "accent-bg",
+        "value": {
+          "light": "#F5DED1",
+          "dark": "#3A2518"
+        },
+        "usage": "Fundo do card de alerta e da tag de destaque."
+      },
+      {
+        "name": "success",
+        "value": {
+          "light": "#2F7A5B",
+          "dark": "#5CC096"
+        },
+        "usage": "Leitura OK, Entregue, Recebido, botão de aceite. Texto sobre surface e success-bg."
+      },
+      {
+        "name": "success-bg",
+        "value": {
+          "light": "#E3F5EE",
+          "dark": "#15302A"
+        },
+        "usage": "Fundo de banners e itens concluídos."
+      },
+      {
+        "name": "warning",
+        "value": {
+          "light": "#E0A526",
+          "dark": "#E0A526"
+        },
+        "usage": "Amarelo de aviso (ex.: falta de peça não-blocante) em bordas, ícones e preenchimentos. Não use como texto (2.1:1 sobre claro)."
+      },
+      {
+        "name": "warning-text",
+        "value": {
+          "light": "#7A5200",
+          "dark": "#F0C35A"
+        },
+        "usage": "Texto de aviso sobre warning-bg ou surface."
+      },
+      {
+        "name": "warning-bg",
+        "value": {
+          "light": "#FFF4D6",
+          "dark": "#3A2E10"
+        },
+        "usage": "Fundo de avisos amarelos."
+      },
+      {
+        "name": "danger",
+        "value": {
+          "light": "#C0392B",
+          "dark": "#EF6B5D"
+        },
+        "usage": "Erro, BLOCANTE, Cancelado, coleta travada. Texto sobre surface e danger-bg. No tema escuro fica mais claro para manter 4.5:1."
+      },
+      {
+        "name": "danger-bg",
+        "value": {
+          "light": "#FBE4E1",
+          "dark": "#3D1A16"
+        },
+        "usage": "Fundo da tag BLOCANTE e de banners de erro."
+      },
+      {
+        "name": "on-status",
+        "value": {
+          "light": "#ffffff",
+          "dark": "#121212"
+        },
+        "usage": "Texto sobre preenchimentos success, danger e accent (botões)."
+      }
+    ]
+  },
+  "type": {
+    "fonts": [],
+    "families": {
+      "sans": "\"Nunito\", ui-rounded, \"SF Pro Rounded\", system-ui, sans-serif"
+    },
+    "groups": [
+      {
+        "name": "Web",
+        "family": "sans",
+        "note": "Nunito (Google Fonts), sans arredondada. Corpo 14px na web.",
+        "styles": [
+          {
+            "name": "h1",
+            "fontSize": "28px",
+            "lineHeight": "36px",
+            "fontWeight": 700,
+            "sample": "Olá, Ricardo!",
+            "usage": "Saudação do header e título de tela; um por tela."
+          },
+          {
+            "name": "h2",
+            "fontSize": "20px",
+            "lineHeight": "28px",
+            "fontWeight": 600,
+            "sample": "Pedidos de kits do Testes",
+            "usage": "Título de card e de seção."
+          },
+          {
+            "name": "h3",
+            "fontSize": "16px",
+            "lineHeight": "24px",
+            "fontWeight": 600,
+            "sample": "Peças do kit",
+            "usage": "Subtítulos e nomes em listas."
+          },
+          {
+            "name": "kpi",
+            "fontSize": "28px",
+            "lineHeight": "34px",
+            "fontWeight": 700,
+            "sample": "5.483",
+            "usage": "Número grande de KPI, sempre tabular."
+          },
+          {
+            "name": "body",
+            "fontSize": "14px",
+            "lineHeight": "20px",
+            "fontWeight": 400,
+            "sample": "Falta Pinça de freio traseira. A coleta só pode ser disparada quando a OP-3308 chegar.",
+            "usage": "Texto corrido e células de tabela na web."
+          },
+          {
+            "name": "caption",
+            "fontSize": "12px",
+            "lineHeight": "16px",
+            "fontWeight": 400,
+            "sample": "Solicitado em 24/09 às 10:40",
+            "usage": "Metadados, legendas de gráfico, notas."
+          },
+          {
+            "name": "tag",
+            "fontSize": "11px",
+            "lineHeight": "14px",
+            "fontWeight": 800,
+            "letterSpacing": "0.04em",
+            "sample": "BLOCANTE",
+            "usage": "Tags de criticidade e prioridade, em maiúsculas."
+          }
+        ]
+      },
+      {
+        "name": "Mobile",
+        "family": "sans",
+        "note": "Chão de fábrica: textos maiores e alto contraste.",
+        "styles": [
+          {
+            "name": "m-title",
+            "fontSize": "22px",
+            "lineHeight": "28px",
+            "fontWeight": 800,
+            "sample": "Coleta do KT-0142",
+            "usage": "Título da tela no header."
+          },
+          {
+            "name": "m-step",
+            "fontSize": "24px",
+            "lineHeight": "30px",
+            "fontWeight": 800,
+            "sample": "Corredor A → Prateleira 02 → Pegue 2 unidades",
+            "usage": "Instrução do passo atual da rota."
+          },
+          {
+            "name": "m-body",
+            "fontSize": "16px",
+            "lineHeight": "24px",
+            "fontWeight": 400,
+            "sample": "8 peças guardadas em Corredor D.",
+            "usage": "Corpo no mobile."
+          },
+          {
+            "name": "m-count",
+            "fontSize": "56px",
+            "lineHeight": "60px",
+            "fontWeight": 800,
+            "sample": "8/10",
+            "usage": "Contador de bipagem."
+          }
+        ]
+      }
+    ]
+  },
+  "spacing": {
+    "note": "Base de 4px. Grid web de 12 colunas, gutter 20px, margem 30px.",
+    "tokens": [
+      {
+        "name": "space-1",
+        "value": "4px",
+        "usage": "Ícone e rótulo em tags."
+      },
+      {
+        "name": "space-2",
+        "value": "8px",
+        "usage": "Entre itens de lista no mobile; dentro de controles."
+      },
+      {
+        "name": "space-3",
+        "value": "12px",
+        "usage": "Gap de ícone e texto; entre cards de KPI pequenos."
+      },
+      {
+        "name": "space-4",
+        "value": "16px",
+        "usage": "Padding de card no mobile; gutter lateral do celular."
+      },
+      {
+        "name": "space-5",
+        "value": "20px",
+        "usage": "Padding de card na web; gutter do grid."
+      },
+      {
+        "name": "space-6",
+        "value": "24px",
+        "usage": "Topo da área de conteúdo web."
+      },
+      {
+        "name": "space-8",
+        "value": "32px",
+        "usage": "Entre blocos grandes."
+      },
+      {
+        "name": "grid-gutter",
+        "value": "20px",
+        "usage": "Espaço entre as 12 colunas web."
+      },
+      {
+        "name": "grid-margin",
+        "value": "30px",
+        "usage": "Margem lateral da área de conteúdo web."
+      }
+    ]
+  },
+  "radius": {
+    "note": "Cantos generosos: cards 12, ícones 8, tudo que é clicável em pílula.",
+    "tokens": [
+      {
+        "name": "radius-icon",
+        "value": "8px",
+        "usage": "Quadrado de ícone dos KPIs, campos de formulário, cabeçalho de tabela."
+      },
+      {
+        "name": "radius-card",
+        "value": "12px",
+        "usage": "Cards, modais, banners, visor da câmera."
+      },
+      {
+        "name": "radius-pill",
+        "value": "999px",
+        "usage": "Botões, busca, filtros de data, tags, item ativo da sidebar."
+      }
+    ]
+  },
+  "shadow": {
+    "note": "Visual plano. Sombra só no que flutua.",
+    "tokens": [
+      {
+        "name": "shadow-float",
+        "value": {
+          "light": "0 16px 40px #0b1a2233",
+          "dark": "0 16px 40px #000000b3"
+        },
+        "usage": "Popover de notificações, modal, toast, drawer."
+      }
+    ]
+  },
+  "size": {
+    "note": "Medidas de layout e toque.",
+    "tokens": [
+      {
+        "name": "touch-min",
+        "value": "48px",
+        "usage": "Alvo mínimo de toque no mobile (botões grandes têm 52px)."
+      },
+      {
+        "name": "sidebar-width",
+        "value": "240px",
+        "usage": "Largura da sidebar web."
+      },
+      {
+        "name": "control-height",
+        "value": "40px",
+        "usage": "Botões, busca e campos na web."
+      }
+    ]
+  }
+}

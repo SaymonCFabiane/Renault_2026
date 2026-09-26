@@ -1,0 +1,1126 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>TracePro</title>
+<meta name="description" content="Protótipo navegável do TracePro">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap">
+<style>
+:root{--pg-bg:#E9F1F5;--pg-ink:#1E2F38;--pg-muted:#5B6B75;--pg-bar:#F6FAFD;--pg-line:#C9D8E0;--pg-accent:#265267;--pg-on:#fff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--pg-bg:#0E1A20;--pg-ink:#EEF3F6;--pg-muted:#A9BAC3;--pg-bar:#15252D;--pg-line:#2A3E48;--pg-accent:#8DBBD0;--pg-on:#10222B;color-scheme:dark}}
+:root[data-theme="dark"]{--pg-bg:#0E1A20;--pg-ink:#EEF3F6;--pg-muted:#A9BAC3;--pg-bar:#15252D;--pg-line:#2A3E48;--pg-accent:#8DBBD0;--pg-on:#10222B;color-scheme:dark}
+body{background:var(--pg-bg);color:var(--pg-ink);font-family:"Nunito",ui-rounded,system-ui,sans-serif;margin:0}
+#app{min-height:100vh;display:flex;flex-direction:column}
+.pres{position:sticky;top:env(safe-area-inset-top,0px);z-index:100;display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:10px 16px;background:var(--pg-bar);border-bottom:1px solid var(--pg-line)}
+.pres__brand{display:flex;flex-direction:column;line-height:18px;margin-right:auto}
+.pres__brand b{font-size:16px;color:var(--pg-accent)}
+.pres__brand span{font-size:12px;color:var(--pg-muted)}
+.pres__seg{display:inline-flex;padding:3px;border-radius:999px;background:var(--pg-line);gap:2px}
+.pres__seg button,.pres__act button{font:inherit;font-weight:700;font-size:13px;border:0;cursor:pointer;height:32px;padding:0 14px;border-radius:999px;background:transparent;color:var(--pg-ink)}
+.pres__seg button.on{background:var(--pg-accent);color:var(--pg-on)}
+.pres__act{display:flex;gap:8px;flex-wrap:wrap}
+.pres__act button{border:1.5px solid var(--pg-line)}
+.pres__act button:hover,.pres__seg button:not(.on):hover{background:var(--pg-line)}
+.pres__where{padding:10px 16px 0;font-size:12px;font-weight:700;color:var(--pg-muted);letter-spacing:.03em}
+.stage{padding:12px 16px 32px;display:flex;justify-content:center;min-width:0}
+.frame{overflow:hidden;border-radius:14px;box-shadow:0 10px 40px #0b1a2226;flex:none}
+.frame--mob{border-radius:0;box-shadow:none;overflow:visible}
+.frame--web>.tp{border-radius:14px;overflow:hidden}
+button:focus-visible{outline:2px solid var(--pg-accent);outline-offset:2px}
+
+.tp{--primary:#265267;--on-primary:#ffffff;--primary-soft:#BCD2DD;--sidebar:#265267;--content-bg:#C8E1ED;--surface:#F6FAFD;--surface-muted:#D4E0E7;--text:#1E2F38;--text-secondary:#5B6B75;--line:#D4E0E7;--data:#547C90;--data-light:#B7CCD6;--accent:#C2703D;--accent-text:#9E5528;--accent-bg:#F5DED1;--success:#2F7A5B;--success-bg:#E3F5EE;--warning:#E0A526;--warning-text:#7A5200;--warning-bg:#FFF4D6;--danger:#C0392B;--danger-bg:#FBE4E1;--on-status:#ffffff;--font-sans:"Nunito",ui-rounded,"SF Pro Rounded",system-ui,sans-serif;--radius-icon:8px;--radius-card:12px;--radius-pill:999px;color-scheme:light}
+.tp[data-theme="dark"]{--primary:#8DBBD0;--on-primary:#10222B;--primary-soft:#2C4F60;--sidebar:#2E6078;--content-bg:#193A4A;--surface:#121212;--surface-muted:#2A3E48;--text:#EEF3F6;--text-secondary:#A9BAC3;--line:#2F4450;--data:#6E97AB;--data-light:#B7CCD6;--accent:#D98A57;--accent-text:#E9A277;--accent-bg:#3A2518;--success:#5CC096;--success-bg:#15302A;--warning:#E0A526;--warning-text:#F0C35A;--warning-bg:#3A2E10;--danger:#EF6B5D;--danger-bg:#3D1A16;--on-status:#121212;color-scheme:dark}
+
+/* TracePro — componentes base. Lê só tokens (var(--…)); web e mobile usam as mesmas classes. */
+.tp, .tp *{box-sizing:border-box}
+.tp{font-family:var(--font-sans);font-size:14px;line-height:20px;color:var(--text);-webkit-font-smoothing:antialiased}
+:where(.tp) button{font:inherit;color:inherit}
+.tp :focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.tp svg.i{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.tp .num{font-variant-numeric:tabular-nums}
+
+/* Tipografia */
+.tp-h1{font-size:28px;line-height:36px;font-weight:700;margin:0;color:var(--text);text-wrap:balance}
+.tp-h2{font-size:20px;line-height:28px;font-weight:600;margin:0;color:var(--text)}
+.tp-h3{font-size:16px;line-height:24px;font-weight:600;margin:0;color:var(--text)}
+.tp-cap{font-size:12px;line-height:16px;color:var(--text-secondary)}
+.tp-muted{color:var(--text-secondary)}
+
+/* Botões — sempre pílula */
+.tp-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 20px;border-radius:var(--radius-pill);border:1.5px solid transparent;font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap;transition:filter .15s,background .15s}
+.tp-btn:hover{filter:brightness(1.06)}
+.tp-btn:active{filter:brightness(.94)}
+.tp-btn--primary{background:var(--primary);color:var(--on-primary)}
+.tp-btn--secondary{background:var(--primary-soft);color:var(--text)}
+.tp-btn--outline{background:var(--surface);color:var(--text);border-color:var(--primary)}
+.tp-btn--ghost{background:transparent;color:var(--primary)}
+.tp-btn--success{background:var(--success);color:var(--on-status)}
+.tp-btn--danger{background:var(--danger);color:var(--on-status)}
+.tp-btn--accent{background:var(--accent);color:var(--on-status)}
+.tp-btn--sm{height:32px;padding:0 14px;font-size:13px}
+.tp-btn--lg{height:52px;padding:0 24px;font-size:16px}
+.tp-btn--block{width:100%}
+.tp-btn[disabled],.tp-btn.is-disabled{opacity:.45;cursor:not-allowed;filter:none}
+.tp-icon-btn{display:inline-grid;place-items:center;width:36px;height:36px;border-radius:var(--radius-pill);border:0;background:transparent;color:var(--text);cursor:pointer;position:relative}
+.tp-icon-btn:hover{background:var(--surface-muted)}
+
+/* Campos */
+.tp-label{display:block;font-size:12px;line-height:16px;font-weight:700;color:var(--text-secondary);margin-bottom:6px;letter-spacing:.02em}
+.tp-input,.tp-select{width:100%;height:40px;padding:0 14px;border-radius:var(--radius-icon);border:1.5px solid transparent;background:var(--surface-muted);color:var(--text);font:inherit}
+.tp-input::placeholder{color:var(--text-secondary)}
+.tp-input:focus,.tp-select:focus{outline:none;border-color:var(--primary)}
+textarea.tp-input{height:auto;padding:10px 14px;resize:vertical}
+.tp-select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--text-secondary) 50%),linear-gradient(135deg,var(--text-secondary) 50%,transparent 50%);background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%;background-size:5px 5px;background-repeat:no-repeat;padding-right:32px}
+.tp-select--pill{border-radius:var(--radius-pill);background-color:var(--surface);border-color:var(--text-secondary)}
+.tp-search{display:flex;align-items:center;height:40px;border:1.5px solid var(--text);border-radius:var(--radius-pill);overflow:hidden;background:var(--surface);min-width:0}
+.tp-search input{flex:1;min-width:0;border:0;background:transparent;padding:0 18px;font:inherit;color:var(--text);height:100%}
+.tp-search input:focus{outline:none}
+.tp-search input::placeholder{color:var(--text-secondary)}
+.tp-search button{height:100%;width:52px;border:0;background:var(--surface-muted);display:grid;place-items:center;cursor:pointer;color:var(--text)}
+.tp-date{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 16px;border:1.5px solid var(--text-secondary);border-radius:var(--radius-pill);background:var(--surface);font-weight:600;color:var(--text)}
+.tp-date svg.i{color:var(--primary)}
+
+/* Toggle de tema e sino */
+.tp-theme{display:inline-flex;align-items:center;gap:2px;padding:3px;border-radius:var(--radius-pill);background:var(--surface-muted);border:0;cursor:pointer}
+.tp-theme span{display:grid;place-items:center;width:32px;height:24px;border-radius:var(--radius-pill);color:var(--text-secondary)}
+.tp-theme span.on{background:var(--primary);color:var(--on-primary)}
+.tp-theme svg.i{width:14px;height:14px}
+.tp-bell .dot{position:absolute;top:-2px;right:-4px;min-width:16px;height:16px;padding:0 4px;border-radius:var(--radius-pill);background:var(--danger);color:#fff;font-size:10px;line-height:16px;font-weight:800;text-align:center;border:2px solid var(--surface)}
+
+/* Avatar */
+.tp-avatar{display:inline-grid;place-items:center;width:40px;height:40px;border-radius:50%;background:var(--primary-soft);color:var(--primary);font-weight:800;flex:none;letter-spacing:.02em}
+.tp-avatar--lg{width:76px;height:76px;font-size:24px;box-shadow:0 0 0 4px var(--sidebar),0 0 0 7px var(--primary-soft)}
+
+/* Cards */
+.tp-card{background:var(--surface);border-radius:var(--radius-card);padding:20px}
+.tp-card__head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+
+/* KPI */
+.tp-iconbox{display:grid;place-items:center;width:48px;height:48px;border-radius:var(--radius-icon);background:var(--success-bg);color:var(--success);border:1px solid color-mix(in srgb,var(--success) 25%,transparent);flex:none}
+.tp-iconbox svg.i{width:22px;height:22px}
+.tp-iconbox--data{background:var(--primary-soft);color:var(--primary);border-color:transparent}
+.tp-iconbox--accent{background:var(--accent-bg);color:var(--accent);border-color:color-mix(in srgb,var(--accent) 30%,transparent)}
+.tp-iconbox--danger{background:var(--danger-bg);color:var(--danger);border-color:transparent}
+.tp-iconbox--warning{background:var(--warning-bg);color:var(--warning-text);border-color:transparent}
+.tp-kpi{position:relative;display:flex;align-items:center;gap:14px;padding:16px;border-radius:var(--radius-card);border:1.5px solid color-mix(in srgb,var(--success) 35%,var(--surface-muted));background:var(--surface)}
+.tp-kpi__num{font-size:28px;line-height:34px;font-weight:700;font-variant-numeric:tabular-nums}
+.tp-kpi__label{color:var(--text-secondary);font-weight:600}
+.tp-kpi--alert{border-color:var(--accent);background:var(--accent-bg)}
+.tp-kpi--alert .tp-kpi__label{color:var(--text)}
+.tp-kpi__info{position:absolute;right:-8px;bottom:-8px;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:var(--accent-bg);color:var(--accent);border:1.5px solid var(--accent)}
+.tp-kpi__info svg.i{width:12px;height:12px}
+
+/* Tabela */
+.tp-table-wrap{overflow-x:auto}
+.tp-table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.tp-table th{background:var(--surface-muted);text-align:left;font-weight:600;padding:12px 16px;white-space:nowrap;color:var(--text)}
+.tp-table th:first-child{border-radius:var(--radius-icon) 0 0 var(--radius-icon)}
+.tp-table th:last-child{border-radius:0 var(--radius-icon) var(--radius-icon) 0}
+.tp-table th .sort{display:inline-flex;vertical-align:middle;margin-left:6px;color:var(--text-secondary)}
+.tp-table th .sort svg.i{width:14px;height:14px}
+.tp-table td{padding:14px 16px;border-bottom:1px solid var(--line);vertical-align:middle}
+.tp-table tr:last-child td{border-bottom:0}
+.tp-table tr.is-clickable{cursor:pointer}
+.tp-table tr.is-clickable:hover td,.tp-table tr.is-selected td{background:color-mix(in srgb,var(--primary-soft) 45%,transparent)}
+.tp-table tr.is-warn td{background:var(--warning-bg)}
+.tp-table tr.is-bad td{background:var(--danger-bg)}
+
+/* Status em texto colorido (sem badge) */
+.tp-status{font-weight:700;display:inline-flex;align-items:center;gap:6px}
+.tp-status--ok{color:var(--success)}
+.tp-status--bad{color:var(--danger)}
+.tp-status--warn{color:var(--warning-text)}
+.tp-status--info{color:var(--primary)}
+.tp-status--muted{color:var(--text-secondary)}
+.tp-status--accent{color:var(--accent-text)}
+
+/* Tags de criticidade */
+.tp-tag{display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 8px;border-radius:var(--radius-pill);font-size:11px;font-weight:800;letter-spacing:.04em;white-space:nowrap}
+.tp-tag svg.i{width:12px;height:12px;stroke-width:2.5}
+.tp-tag--blocante{background:var(--danger-bg);color:var(--danger)}
+.tp-tag--nao{background:var(--surface-muted);color:var(--text-secondary)}
+.tp-tag--info{background:var(--primary-soft);color:var(--primary)}
+.tp-tag--accent{background:var(--accent-bg);color:var(--accent-text)}
+.tp-tag--ok{background:var(--success-bg);color:var(--success)}
+.tp-tag--warn{background:var(--warning-bg);color:var(--warning-text)}
+
+/* Abas */
+.tp-tabs{display:flex;gap:28px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tp-tab{background:none;border:0;padding:8px 2px 10px;font-weight:600;font-size:15px;color:var(--text-secondary);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tp-tab.on{color:var(--accent-text);border-bottom-color:var(--accent)}
+.tp-tab .count{display:inline-block;min-width:20px;height:20px;padding:0 6px;margin-left:6px;border-radius:var(--radius-pill);background:var(--surface-muted);font-size:11px;line-height:20px;color:var(--text)}
+
+/* Paginação */
+.tp-pages{display:flex;align-items:center;justify-content:center;gap:10px;font-weight:600;font-size:13px}
+.tp-pages button{width:28px;height:28px;border-radius:50%;border:0;background:transparent;cursor:pointer;color:var(--text)}
+.tp-pages button.on{background:var(--primary);color:var(--on-primary)}
+.tp-pages button.arrow{border:1.5px solid var(--primary);color:var(--primary);display:grid;place-items:center}
+.tp-pages button.arrow svg.i{width:14px;height:14px}
+
+/* Chave, checkbox, segmento */
+.tp-switch{display:inline-flex;align-items:center;gap:8px;cursor:pointer;user-select:none;font-weight:700;font-size:12px}
+.tp-switch input{position:absolute;opacity:0;pointer-events:none}
+.tp-switch .track{width:36px;height:20px;border-radius:var(--radius-pill);background:var(--surface-muted);position:relative;transition:background .15s;flex:none}
+.tp-switch .track::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--surface);box-shadow:0 1px 2px #0003;transition:left .15s}
+.tp-switch input:checked+.track{background:var(--danger)}
+.tp-switch input:checked+.track::after{left:18px}
+.tp-switch input:focus-visible+.track{outline:2px solid var(--primary);outline-offset:2px}
+.tp-check{display:flex;gap:10px;align-items:flex-start;cursor:pointer}
+.tp-check input{width:18px;height:18px;accent-color:var(--primary);margin:1px 0 0;flex:none}
+.tp-seg{display:inline-flex;padding:3px;border-radius:var(--radius-pill);background:var(--surface-muted);gap:2px}
+.tp-seg button{border:0;background:transparent;height:30px;padding:0 14px;border-radius:var(--radius-pill);font-weight:700;font-size:13px;cursor:pointer;color:var(--text-secondary);display:inline-flex;align-items:center;gap:6px}
+.tp-seg button.on{background:var(--surface);color:var(--text);box-shadow:0 1px 2px #0002}
+.tp-seg--prio button.on[data-v="Alta"]{background:var(--danger);color:#fff}
+.tp-seg--prio button.on[data-v="Média"]{background:var(--warning);color:#1E2F38}
+.tp-seg--prio button.on[data-v="Baixa"]{background:var(--primary);color:var(--on-primary)}
+
+/* Banners, toasts, modais */
+.tp-banner{display:flex;gap:12px;align-items:flex-start;padding:12px 16px;border-radius:var(--radius-card);border:1.5px solid;font-weight:600}
+.tp-banner svg.i{margin-top:1px}
+.tp-banner--ok{background:var(--success-bg);color:var(--success);border-color:color-mix(in srgb,var(--success) 40%,transparent)}
+.tp-banner--warn{background:var(--warning-bg);color:var(--warning-text);border-color:var(--warning)}
+.tp-banner--bad{background:var(--danger-bg);color:var(--danger);border-color:color-mix(in srgb,var(--danger) 40%,transparent)}
+.tp-banner--info{background:var(--primary-soft);color:var(--text);border-color:transparent}
+.tp-banner b{color:inherit}
+.tp-banner p{margin:2px 0 0;font-weight:500;color:var(--text)}
+.tp-toasts{position:absolute;right:20px;bottom:20px;display:flex;flex-direction:column;gap:8px;z-index:60;pointer-events:none;max-width:calc(100% - 40px)}
+.tp-toast{display:flex;gap:10px;align-items:center;padding:12px 16px;border-radius:var(--radius-card);background:var(--text);color:var(--surface);font-weight:600;box-shadow:0 8px 24px #0003;animation:tp-in .25s ease-out;max-width:380px}
+.tp-toast .ico{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;flex:none}
+.tp-toast--ok .ico{background:var(--success);color:#fff}
+.tp-toast--bad .ico{background:var(--danger);color:#fff}
+.tp-toast--warn .ico{background:var(--warning);color:#1E2F38}
+.tp-toast .ico svg.i{width:15px;height:15px}
+@keyframes tp-in{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}
+.tp-backdrop{position:absolute;inset:0;background:#0b1a2266;display:grid;place-items:center;z-index:50;padding:20px;animation:tp-fade .15s}
+@keyframes tp-fade{from{opacity:0}}
+.tp-modal{background:var(--surface);border-radius:var(--radius-card);padding:24px;width:min(440px,100%);box-shadow:0 20px 50px #0004;display:flex;flex-direction:column;gap:16px;max-height:100%;overflow:auto}
+.tp-modal__icon{width:52px;height:52px;border-radius:50%;display:grid;place-items:center}
+.tp-modal__icon svg.i{width:26px;height:26px}
+.tp-modal__actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+.tp-progress{height:8px;border-radius:var(--radius-pill);background:var(--surface-muted);overflow:hidden}
+.tp-progress>i{display:block;height:100%;border-radius:inherit;background:var(--data);transition:width .3s}
+.tp-progress--ok>i{background:var(--success)}
+
+/* Vazio / bloqueado */
+.tp-empty{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:32px 16px;color:var(--text-secondary)}
+.tp-empty .ring{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:var(--surface-muted);color:var(--text-secondary)}
+.tp-empty b{color:var(--text);font-size:15px}
+.tp-locked{opacity:.55}
+
+/* Visor de câmera (leitura de QR simulada) */
+.tp-scanner{position:relative;background:#0d1a20;border-radius:var(--radius-card);aspect-ratio:4/3;max-width:100%;overflow:hidden;display:grid;place-items:center;color:#cfe3ec}
+.tp-scanner::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 45%,#23404d 0,#0d1a20 70%)}
+.tp-scanner__frame{position:relative;width:58%;aspect-ratio:1;border-radius:14px;--c:#e9f3f7}
+.tp-scanner__frame i{position:absolute;width:26px;height:26px;border:4px solid var(--c)}
+.tp-scanner__frame i:nth-child(1){top:0;left:0;border-right:0;border-bottom:0;border-radius:12px 0 0 0}
+.tp-scanner__frame i:nth-child(2){top:0;right:0;border-left:0;border-bottom:0;border-radius:0 12px 0 0}
+.tp-scanner__frame i:nth-child(3){bottom:0;left:0;border-right:0;border-top:0;border-radius:0 0 0 12px}
+.tp-scanner__frame i:nth-child(4){bottom:0;right:0;border-left:0;border-top:0;border-radius:0 0 12px 0}
+.tp-scanner__laser{position:absolute;left:8%;right:8%;height:2px;background:var(--c);box-shadow:0 0 12px var(--c);animation:tp-laser 1.8s ease-in-out infinite alternate;top:10%}
+@keyframes tp-laser{to{top:88%}}
+.tp-scanner__qr{position:absolute;inset:22%;opacity:.18;color:#fff}
+.tp-scanner__qr svg{width:100%;height:100%}
+.tp-scanner__msg{position:absolute;left:12px;right:12px;bottom:12px;display:flex;align-items:center;gap:8px;justify-content:center;padding:8px 12px;border-radius:var(--radius-pill);background:#0008;font-weight:700;font-size:14px;text-align:center}
+.tp-scanner__beep{position:absolute;top:12px;right:12px;display:flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:4px 8px;border-radius:var(--radius-pill);background:#0006}
+.tp-scanner.is-ok .tp-scanner__frame{--c:#4fd39a}
+.tp-scanner.is-ok{box-shadow:inset 0 0 0 4px #4fd39a}
+.tp-scanner.is-ok .tp-scanner__msg{background:#1f6b4c}
+.tp-scanner.is-bad .tp-scanner__frame{--c:#ff6b5e}
+.tp-scanner.is-bad{box-shadow:inset 0 0 0 4px #ff6b5e}
+.tp-scanner.is-bad .tp-scanner__msg{background:#a3281c}
+.tp-scanner.is-ok .tp-scanner__laser,.tp-scanner.is-bad .tp-scanner__laser{animation:none;opacity:0}
+
+/* Leituras (histórico de bipagem) */
+.tp-reads{display:flex;flex-direction:column;gap:8px}
+.tp-read{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:var(--radius-icon);background:var(--surface);border:1.5px solid var(--line)}
+.tp-read .ico{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;flex:none}
+.tp-read--ok .ico{background:var(--success-bg);color:var(--success)}
+.tp-read--bad{border-color:var(--danger);background:var(--danger-bg)}
+.tp-read--bad .ico{background:var(--danger);color:#fff}
+.tp-read .code{font-weight:800;font-variant-numeric:tabular-nums}
+.tp-read .when{margin-left:auto;font-size:12px;color:var(--text-secondary);font-variant-numeric:tabular-nums}
+
+/* Etiqueta de peça */
+.tp-label-card{display:grid;grid-template-columns:64px 1fr;gap:10px;align-items:center;padding:10px;border-radius:var(--radius-icon);background:#fff;color:#111;border:1.5px dashed #9aa9b1;font-size:11px;line-height:14px}
+.tp-label-card .qr{width:64px;height:64px}
+.tp-label-card b{font-size:13px;display:block}
+
+/* Linha do tempo */
+.tp-timeline{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.tp-timeline li{display:grid;grid-template-columns:44px 1fr;gap:14px;position:relative;padding-bottom:22px}
+.tp-timeline li:not(:last-child)::before{content:"";position:absolute;left:21px;top:44px;bottom:0;width:2px;background:var(--data-light)}
+.tp-timeline .dot{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--primary-soft);color:var(--primary)}
+.tp-timeline li.last .dot{background:var(--primary);color:var(--on-primary)}
+.tp-timeline .when{font-size:12px;color:var(--text-secondary);font-weight:700;font-variant-numeric:tabular-nums}
+
+/* Kanban */
+.tp-kanban{display:grid;grid-template-columns:repeat(5,minmax(180px,1fr));gap:14px;overflow-x:auto;padding-bottom:4px}
+.tp-kcol{background:color-mix(in srgb,var(--surface) 55%,transparent);border-radius:var(--radius-card);padding:12px;display:flex;flex-direction:column;gap:10px;min-height:280px}
+.tp-kcol__head{display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:13px}
+.tp-kcard{background:var(--surface);border-radius:var(--radius-icon);padding:12px;display:flex;flex-direction:column;gap:8px;cursor:pointer;border:1.5px solid transparent;text-align:left;width:100%}
+.tp-kcard:hover,.tp-kcard.on{border-color:var(--primary)}
+
+/* Planta do galpão */
+.tp-map{display:grid;gap:10px}
+.tp-aisle{display:grid;grid-template-columns:120px repeat(8,1fr);gap:6px;align-items:center}
+.tp-slot{height:30px;border-radius:6px;background:var(--surface-muted);display:grid;place-items:center;font-size:11px;font-weight:700;color:var(--text-secondary)}
+.tp-slot.used{background:var(--data-light);color:var(--text)}
+.tp-slot.hit{background:var(--primary);color:var(--on-primary)}
+.tp-seq{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-weight:800;font-size:12px;flex:none}
+
+/* Gráficos (SVG) */
+.tp-chart{display:block;width:100%;height:auto;overflow:visible}
+.tp-chart text{fill:var(--text-secondary);font-size:11px;font-family:var(--font-sans);font-variant-numeric:tabular-nums}
+.tp-chart .grid{stroke:var(--line);stroke-dasharray:4 4}
+.tp-legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;font-weight:600;color:var(--text-secondary)}
+.tp-legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.tp-hbar{display:grid;grid-template-columns:150px 1fr;gap:10px;align-items:center;font-size:13px}
+.tp-hbar .track{display:flex;align-items:center;gap:8px}
+.tp-hbar .bar{height:12px;border-radius:var(--radius-pill);background:var(--data)}
+
+/* Estrutura web */
+.tp-app{display:grid;grid-template-columns:240px 1fr;height:100%;background:var(--content-bg);overflow:hidden;position:relative}
+.tp-side{background:var(--sidebar);color:#fff;display:flex;flex-direction:column;padding:28px 0 20px 18px;min-height:0}
+.tp-side__who{display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;padding-right:18px;margin-bottom:28px}
+.tp-side__who .name{font-weight:700;font-size:16px;margin-top:10px}
+.tp-side__who .role{font-size:12px;opacity:.85}
+.tp-side__who .mod{display:inline-flex;align-items:center;gap:6px;margin-top:6px;padding:3px 10px;border-radius:var(--radius-pill);background:#ffffff1f;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.tp-side__who .mod svg.i{width:13px;height:13px}
+.tp-nav{display:flex;flex-direction:column;gap:6px;flex:1}
+.tp-nav button{position:relative;display:flex;align-items:center;gap:12px;height:46px;padding:0 18px;border:0;background:transparent;color:#fff;font-weight:600;font-size:15px;text-align:left;cursor:pointer;border-radius:var(--radius-pill) 0 0 var(--radius-pill)}
+.tp-nav button:hover:not(.on){background:#ffffff14}
+.tp-nav button.on{background:var(--content-bg);color:var(--text);font-weight:700}
+.tp-nav button.on::before,.tp-nav button.on::after{content:"";position:absolute;right:0;width:24px;height:24px;pointer-events:none}
+.tp-nav button.on::before{top:-24px;border-bottom-right-radius:24px;box-shadow:8px 8px 0 8px var(--content-bg)}
+.tp-nav button.on::after{bottom:-24px;border-top-right-radius:24px;box-shadow:8px -8px 0 8px var(--content-bg)}
+.tp-nav button.on svg.i{color:var(--primary)}
+.tp-side__swap{display:flex;align-items:center;gap:10px;height:44px;margin-right:18px;padding:0 18px;border-radius:var(--radius-pill);border:1.5px solid #ffffff55;background:transparent;color:#fff;font-weight:700;cursor:pointer}
+.tp-side__swap:hover{background:#ffffff14}
+.tp-main{display:flex;flex-direction:column;min-width:0;min-height:0}
+.tp-head{display:flex;align-items:center;gap:16px;padding:18px 30px;background:var(--surface)}
+.tp-head .tp-search{width:360px;margin-left:auto}
+.tp-content{flex:1;overflow:auto;padding:24px 30px 40px}
+.tp-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:20px}
+.tp-stack{display:flex;flex-direction:column;gap:20px}
+.tp-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.tp-panel-title{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+
+/* Popover de notificações */
+.tp-pop{position:absolute;top:64px;right:24px;width:360px;background:var(--surface);border-radius:var(--radius-card);box-shadow:0 16px 40px #0003;z-index:40;padding:8px;border:1px solid var(--line)}
+.tp-pop h4{margin:8px 10px 6px;font-size:14px}
+.tp-note{display:flex;gap:12px;padding:10px;border-radius:var(--radius-icon)}
+.tp-note:hover{background:var(--surface-muted)}
+.tp-note .ico{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;flex:none}
+.tp-note p{margin:0;font-size:13px;line-height:18px}
+.tp-note small{color:var(--text-secondary);font-size:11px}
+
+/* Mobile */
+.tp-phone{position:relative;width:390px;height:844px;max-width:100%;border-radius:44px;background:var(--content-bg);overflow:hidden;box-shadow:0 0 0 10px #10222b,0 30px 60px #0003;display:flex;flex-direction:column;font-size:16px;line-height:24px}
+.tp-phone .tp-btn{height:52px;font-size:16px;padding:0 22px}
+.tp-phone .tp-btn--sm{height:40px;font-size:14px;padding:0 16px}
+.tp-m-status{height:44px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 28px;font-size:14px;font-weight:700;background:var(--sidebar);color:#fff}
+.tp-m-head{background:var(--sidebar);color:#fff;padding:6px 20px 18px;flex:none;border-radius:0 0 24px 24px}
+.tp-m-head__row{display:flex;align-items:center;gap:12px}
+.tp-m-head .tp-avatar{width:44px;height:44px}
+.tp-m-head .who{flex:1;min-width:0;line-height:20px}
+.tp-m-head .who b{display:block;font-size:17px}
+.tp-m-head .who span{font-size:13px;opacity:.85}
+.tp-m-head .tp-icon-btn{color:#fff;width:48px;height:48px}
+.tp-m-head .tp-icon-btn:hover{background:#ffffff1f}
+.tp-m-head .tp-bell .dot{border-color:var(--sidebar)}
+.tp-m-swap{display:inline-flex;align-items:center;gap:6px;margin-top:12px;height:36px;padding:0 14px;border-radius:var(--radius-pill);border:1.5px solid #ffffff66;background:transparent;color:#fff;font-weight:700;font-size:13px;cursor:pointer}
+.tp-m-title{display:flex;align-items:center;gap:8px;margin-top:14px}
+.tp-m-title h2{font-size:22px;line-height:28px;margin:0;font-weight:800}
+.tp-m-back{width:40px;height:40px;border-radius:50%;border:0;background:#ffffff1f;color:#fff;display:grid;place-items:center;cursor:pointer;flex:none}
+.tp-m-body{flex:1;overflow:auto;padding:18px 16px 24px;display:flex;flex-direction:column;gap:14px}
+.tp-m-body>*{flex-shrink:0}
+.tp-m-body .tp-card{padding:16px}
+.tp-m-nav{flex:none;display:flex;background:var(--surface);border-top:1px solid var(--line);padding:6px 8px 22px}
+.tp-m-nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;min-height:56px;border:0;background:transparent;color:var(--text-secondary);font-size:11px;font-weight:700;cursor:pointer;border-radius:var(--radius-icon);justify-content:center}
+.tp-m-nav button svg.i{width:22px;height:22px}
+.tp-m-nav button.on{color:var(--primary)}
+.tp-m-nav button.on svg.i{background:var(--primary-soft);border-radius:var(--radius-pill);width:52px;padding:3px 0;height:28px}
+.tp-fab{position:absolute;right:20px;bottom:104px;width:64px;height:64px;border-radius:50%;border:0;background:var(--accent);color:#fff;display:grid;place-items:center;box-shadow:0 10px 24px #c2703d66;cursor:pointer;z-index:5}
+.tp-fab svg.i{width:28px;height:28px}
+.tp-bigcount{font-size:56px;line-height:60px;font-weight:800;font-variant-numeric:tabular-nums}
+.tp-step{background:var(--primary);color:var(--on-primary);border-radius:var(--radius-card);padding:18px}
+.tp-step .where{font-size:24px;line-height:30px;font-weight:800;margin:6px 0}
+.tp-item{display:flex;align-items:center;gap:12px;padding:12px;border-radius:var(--radius-icon);background:var(--surface);border:1.5px solid var(--line)}
+.tp-item.is-current{border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-soft)}
+.tp-item.is-done{background:var(--success-bg);border-color:transparent}
+.tp-item.is-miss{background:var(--warning-bg);border-color:var(--warning)}
+.tp-item .ico{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;flex:none;background:var(--surface-muted);color:var(--text-secondary)}
+.tp-item.is-done .ico{background:var(--success);color:#fff}
+.tp-item.is-current .ico{background:var(--primary);color:var(--on-primary)}
+.tp-item.is-miss .ico{background:var(--warning);color:#1E2F38}
+.tp-item .t{flex:1;min-width:0;line-height:20px}
+.tp-item .t b{display:block;font-size:15px}
+.tp-item .t span{font-size:13px;color:var(--text-secondary)}
+.tp-lockscreen{position:absolute;inset:0;background:var(--danger);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px;gap:14px;z-index:30}
+.tp-lockscreen .big{width:96px;height:96px;border-radius:50%;background:#ffffff26;display:grid;place-items:center}
+.tp-lockscreen .big svg.i{width:48px;height:48px}
+.tp-photo{height:120px;border-radius:var(--radius-icon);border:2px dashed var(--text-secondary);display:grid;place-items:center;color:var(--text-secondary);background:var(--surface-muted);cursor:pointer}
+.tp-thumb{width:84px;height:84px;border-radius:var(--radius-icon);background:linear-gradient(135deg,#8aa8b6,#547c90 60%,#3b5a69);display:grid;place-items:center;color:#fff}
+@media (prefers-reduced-motion:reduce){.tp-scanner__laser{animation:none}.tp-toast,.tp-backdrop{animation:none}}
+.tp-drawer{position:absolute;top:0;right:0;bottom:0;width:400px;max-width:100%;background:var(--surface);box-shadow:-12px 0 32px #0002;z-index:30;display:flex;flex-direction:column;animation:tp-slide .2s ease-out}
+@keyframes tp-slide{from{transform:translateX(30px);opacity:0}}
+.tp-drawer__head{display:flex;align-items:flex-start;gap:12px;padding:20px 20px 12px;border-bottom:1px solid var(--line)}
+.tp-drawer__body{flex:1;overflow:auto;padding:16px 20px 24px;display:flex;flex-direction:column;gap:14px}
+.tp-stat{background:var(--surface-muted);border-radius:var(--radius-icon);padding:12px 14px}
+.tp-stat b{display:block;font-size:24px;line-height:30px;font-variant-numeric:tabular-nums}
+.tp-stat span{font-size:12px;color:var(--text-secondary);font-weight:700}
+.tp-stat--bad{background:var(--danger-bg)}.tp-stat--bad b{color:var(--danger)}
+.tp-stat--warn{background:var(--warning-bg)}.tp-stat--warn b{color:var(--warning-text)}
+.tp-stat--ok{background:var(--success-bg)}.tp-stat--ok b{color:var(--success)}
+.tp-link{background:none;border:0;padding:0;color:var(--primary);font-weight:700;text-decoration:underline;cursor:pointer;font:inherit}
+.tp-result{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:var(--radius-icon);border:1.5px solid var(--line)}
+.tp-result .t{flex:1;min-width:0}
+.tp-result .t b{display:block}
+.tp-result .t span{font-size:12px;color:var(--text-secondary)}
+
+</style>
+<div id="app"></div>
+<script>
+const ICONS={"package":"<path d=\"M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z\"/><path d=\"M12 22V12\"/><path d=\"m3.3 7 7.703 4.734a2 2 0 0 0 1.994 0L20.7 7\"/><path d=\"m7.5 4.27 9 5.15\"/>","layers":"<path d=\"m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z\"/><path d=\"m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65\"/><path d=\"m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65\"/>","trending-up":"<polyline points=\"22 7 13.5 15.5 8.5 10.5 2 17\"/><polyline points=\"16 7 22 7 22 13\"/>","package-x":"<path d=\"M21 10V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l2-1.14\"/><path d=\"m7.5 4.27 9 5.15\"/><polyline points=\"3.29 7 12 12 20.71 7\"/><line x1=\"12\" x2=\"12\" y1=\"22\" y2=\"12\"/><path d=\"m17 13 5 5m-5 0 5-5\"/>","bell":"<path d=\"M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9\"/><path d=\"M10.3 21a1.94 1.94 0 0 0 3.4 0\"/>","search":"<circle cx=\"11\" cy=\"11\" r=\"8\"/><path d=\"m21 21-4.3-4.3\"/>","sun":"<circle cx=\"12\" cy=\"12\" r=\"4\"/><path d=\"M12 2v2\"/><path d=\"M12 20v2\"/><path d=\"m4.93 4.93 1.41 1.41\"/><path d=\"m17.66 17.66 1.41 1.41\"/><path d=\"M2 12h2\"/><path d=\"M20 12h2\"/><path d=\"m6.34 17.66-1.41 1.41\"/><path d=\"m19.07 4.93-1.41 1.41\"/>","moon":"<path d=\"M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z\"/>","lock":"<rect width=\"18\" height=\"11\" x=\"3\" y=\"11\" rx=\"2\" ry=\"2\"/><path d=\"M7 11V7a5 5 0 0 1 10 0v4\"/>","lock-open":"<rect width=\"18\" height=\"11\" x=\"3\" y=\"11\" rx=\"2\" ry=\"2\"/><path d=\"M7 11V7a5 5 0 0 1 9.9-1\"/>","scan-line":"<path d=\"M3 7V5a2 2 0 0 1 2-2h2\"/><path d=\"M17 3h2a2 2 0 0 1 2 2v2\"/><path d=\"M21 17v2a2 2 0 0 1-2 2h-2\"/><path d=\"M7 21H5a2 2 0 0 1-2-2v-2\"/><path d=\"M7 12h10\"/>","qr-code":"<rect width=\"5\" height=\"5\" x=\"3\" y=\"3\" rx=\"1\"/><rect width=\"5\" height=\"5\" x=\"16\" y=\"3\" rx=\"1\"/><rect width=\"5\" height=\"5\" x=\"3\" y=\"16\" rx=\"1\"/><path d=\"M21 16h-3a2 2 0 0 0-2 2v3\"/><path d=\"M21 21v.01\"/><path d=\"M12 7v3a2 2 0 0 1-2 2H7\"/><path d=\"M3 12h.01\"/><path d=\"M12 3h.01\"/><path d=\"M12 16v.01\"/><path d=\"M16 12h1\"/><path d=\"M21 12v.01\"/><path d=\"M12 21v-1\"/>","printer":"<path d=\"M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2\"/><path d=\"M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6\"/><rect x=\"6\" y=\"14\" width=\"12\" height=\"8\" rx=\"1\"/>","camera":"<path d=\"M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z\"/><circle cx=\"12\" cy=\"13\" r=\"3\"/>","truck":"<path d=\"M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2\"/><path d=\"M15 18H9\"/><path d=\"M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14\"/><circle cx=\"17\" cy=\"18\" r=\"2\"/><circle cx=\"7\" cy=\"18\" r=\"2\"/>","warehouse":"<path d=\"M22 8.35V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8.35A2 2 0 0 1 3.26 6.5l8-3.2a2 2 0 0 1 1.48 0l8 3.2A2 2 0 0 1 22 8.35Z\"/><path d=\"M6 18h12\"/><path d=\"M6 14h12\"/><rect width=\"12\" height=\"12\" x=\"6\" y=\"10\"/>","map-pin":"<path d=\"M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0\"/><circle cx=\"12\" cy=\"10\" r=\"3\"/>","route":"<circle cx=\"6\" cy=\"19\" r=\"3\"/><path d=\"M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15\"/><circle cx=\"18\" cy=\"5\" r=\"3\"/>","history":"<path d=\"M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8\"/><path d=\"M3 3v5h5\"/><path d=\"M12 7v5l4 2\"/>","clipboard-check":"<rect width=\"8\" height=\"4\" x=\"8\" y=\"2\" rx=\"1\" ry=\"1\"/><path d=\"M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2\"/><path d=\"m9 14 2 2 4-4\"/>","triangle-alert":"<path d=\"m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3\"/><path d=\"M12 9v4\"/><path d=\"M12 17h.01\"/>","circle-check":"<circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"m9 12 2 2 4-4\"/>","circle-x":"<circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"m15 9-6 6\"/><path d=\"m9 9 6 6\"/>","chevron-up":"<path d=\"m18 15-6-6-6 6\"/>","chevron-down":"<path d=\"m6 9 6 6 6-6\"/>","chevrons-up-down":"<path d=\"m7 15 5 5 5-5\"/><path d=\"m7 9 5-5 5 5\"/>","chevron-left":"<path d=\"m15 18-6-6 6-6\"/>","chevron-right":"<path d=\"m9 18 6-6-6-6\"/>","calendar":"<path d=\"M8 2v4\"/><path d=\"M16 2v4\"/><rect width=\"18\" height=\"18\" x=\"3\" y=\"4\" rx=\"2\"/><path d=\"M3 10h18\"/>","users":"<path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\"/><circle cx=\"9\" cy=\"7\" r=\"4\"/><path d=\"M22 21v-2a4 4 0 0 0-3-3.87\"/><path d=\"M16 3.13a4 4 0 0 1 0 7.75\"/>","user":"<path d=\"M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2\"/><circle cx=\"12\" cy=\"7\" r=\"4\"/>","arrow-left-right":"<path d=\"M8 3 4 7l4 4\"/><path d=\"M4 7h16\"/><path d=\"m16 21 4-4-4-4\"/><path d=\"M20 17H4\"/>","factory":"<path d=\"M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z\"/><path d=\"M17 18h1\"/><path d=\"M12 18h1\"/><path d=\"M7 18h1\"/>","boxes":"<path d=\"M2.97 12.92A2 2 0 0 0 2 14.63v3.24a2 2 0 0 0 .97 1.71l3 1.8a2 2 0 0 0 2.06 0L12 19v-5.5l-5-3-4.03 2.42Z\"/><path d=\"m7 16.5-4.74-2.85\"/><path d=\"m7 16.5 5-3\"/><path d=\"M7 16.5v5.17\"/><path d=\"M12 13.5V19l3.97 2.38a2 2 0 0 0 2.06 0l3-1.8a2 2 0 0 0 .97-1.71v-3.24a2 2 0 0 0-.97-1.71L17 10.5l-5 3Z\"/><path d=\"m17 16.5-5-3\"/><path d=\"m17 16.5 4.74-2.85\"/><path d=\"M17 16.5v5.17\"/><path d=\"M7.97 4.42A2 2 0 0 0 7 6.13v4.37l5 3 5-3V6.13a2 2 0 0 0-.97-1.71l-3-1.8a2 2 0 0 0-2.06 0l-3 1.8Z\"/><path d=\"M12 8 7.26 5.15\"/><path d=\"m12 8 4.74-2.85\"/><path d=\"M12 13.5V8\"/>","flask-conical":"<path d=\"M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2\"/><path d=\"M8.5 2h7\"/><path d=\"M7 16h10\"/>","car":"<path d=\"M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2\"/><circle cx=\"7\" cy=\"17\" r=\"2\"/><path d=\"M9 17h6\"/><circle cx=\"17\" cy=\"17\" r=\"2\"/>","gauge":"<path d=\"m12 14 4-4\"/><path d=\"M3.34 19a10 10 0 1 1 17.32 0\"/>","volume-2":"<path d=\"M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z\"/><path d=\"M16 9a5 5 0 0 1 0 6\"/><path d=\"M19.364 18.364a9 9 0 0 0 0-12.728\"/>","plus":"<path d=\"M5 12h14\"/><path d=\"M12 5v14\"/>","minus":"<path d=\"M5 12h14\"/>","arrow-up":"<path d=\"m5 12 7-7 7 7\"/><path d=\"M12 19V5\"/>","arrow-down":"<path d=\"M12 5v14\"/><path d=\"m19 12-7 7-7-7\"/>","send":"<path d=\"M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z\"/><path d=\"m21.854 2.147-10.94 10.939\"/>","list":"<path d=\"M3 12h.01\"/><path d=\"M3 18h.01\"/><path d=\"M3 6h.01\"/><path d=\"M8 12h13\"/><path d=\"M8 18h13\"/><path d=\"M8 6h13\"/>","square-kanban":"<rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\"/><path d=\"M8 7v7\"/><path d=\"M12 7v4\"/><path d=\"M16 7v9\"/>","table":"<path d=\"M12 3v18\"/><rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\"/><path d=\"M3 9h18\"/><path d=\"M3 15h18\"/>","house":"<path d=\"M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8\"/><path d=\"M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\"/>","inbox":"<polyline points=\"22 12 16 12 14 15 10 15 8 12 2 12\"/><path d=\"M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z\"/>","file-check":"<path d=\"M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z\"/><path d=\"M14 2v4a2 2 0 0 0 2 2h4\"/><path d=\"m9 15 2 2 4-4\"/>","layout-dashboard":"<rect width=\"7\" height=\"9\" x=\"3\" y=\"3\" rx=\"1\"/><rect width=\"7\" height=\"5\" x=\"14\" y=\"3\" rx=\"1\"/><rect width=\"7\" height=\"9\" x=\"14\" y=\"12\" rx=\"1\"/><rect width=\"7\" height=\"5\" x=\"3\" y=\"16\" rx=\"1\"/>","clipboard-list":"<rect width=\"8\" height=\"4\" x=\"8\" y=\"2\" rx=\"1\" ry=\"1\"/><path d=\"M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2\"/><path d=\"M12 11h4\"/><path d=\"M12 16h4\"/><path d=\"M8 11h.01\"/><path d=\"M8 16h.01\"/>","info":"<circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"M12 16v-4\"/><path d=\"M12 8h.01\"/>","image":"<rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\" ry=\"2\"/><circle cx=\"9\" cy=\"9\" r=\"2\"/><path d=\"m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21\"/>","package-check":"<path d=\"m16 16 2 2 4-4\"/><path d=\"M21 10V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l2-1.14\"/><path d=\"m7.5 4.27 9 5.15\"/><polyline points=\"3.29 7 12 12 20.71 7\"/><line x1=\"12\" x2=\"12\" y1=\"22\" y2=\"12\"/>","package-search":"<path d=\"M21 10V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l2-1.14\"/><path d=\"m7.5 4.27 9 5.15\"/><polyline points=\"3.29 7 12 12 20.71 7\"/><line x1=\"12\" x2=\"12\" y1=\"22\" y2=\"12\"/><circle cx=\"18.5\" cy=\"15.5\" r=\"2.5\"/><path d=\"M20.27 17.27 22 19\"/>","timer":"<line x1=\"10\" x2=\"14\" y1=\"2\" y2=\"2\"/><line x1=\"12\" x2=\"15\" y1=\"14\" y2=\"11\"/><circle cx=\"12\" cy=\"14\" r=\"8\"/>","x":"<path d=\"M18 6 6 18\"/><path d=\"m6 6 12 12\"/>","check":"<path d=\"M20 6 9 17l-5-5\"/>","tag":"<path d=\"M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z\"/><circle cx=\"7.5\" cy=\"7.5\" r=\".5\" fill=\"currentColor\"/>","scan-barcode":"<path d=\"M3 7V5a2 2 0 0 1 2-2h2\"/><path d=\"M17 3h2a2 2 0 0 1 2 2v2\"/><path d=\"M21 17v2a2 2 0 0 1-2 2h-2\"/><path d=\"M7 21H5a2 2 0 0 1-2-2v-2\"/><path d=\"M8 7v10\"/><path d=\"M12 7v10\"/><path d=\"M17 7v10\"/>","hand":"<path d=\"M18 11V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2\"/><path d=\"M14 10V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v2\"/><path d=\"M10 10.5V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2v8\"/><path d=\"M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15\"/>","ban":"<circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"m4.9 4.9 14.2 14.2\"/>","circle-alert":"<circle cx=\"12\" cy=\"12\" r=\"10\"/><line x1=\"12\" x2=\"12\" y1=\"8\" y2=\"12\"/><line x1=\"12\" x2=\"12.01\" y1=\"16\" y2=\"16\"/>","zap":"<path d=\"M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z\"/>"};
+
+/* ===== Dados fictícios fixos ===== */
+const PROFILES = {
+  carla:   {id:'carla', name:'Carla Mendes', ini:'CM', role:'Administradora', mod:'Fornecedor', org:'MetalSul Autopeças', icon:'factory', device:'web', first:'Carla'},
+  ricardo: {id:'ricardo', name:'Ricardo Alves', ini:'RA', role:'Gestor', mod:'Estoque', org:'Montadora · Almoxarifado', icon:'warehouse', device:'web', first:'Ricardo'},
+  juliana: {id:'juliana', name:'Juliana Costa', ini:'JC', role:'Coordenadora', mod:'Testes', org:'Montadora · Engenharia de Testes', icon:'flask-conical', device:'web', first:'Juliana'},
+  bruno:   {id:'bruno', name:'Bruno Lima', ini:'BL', role:'Operador de Produção', mod:'Fornecedor', org:'MetalSul Autopeças', icon:'factory', device:'mob', first:'Bruno'},
+  marcos:  {id:'marcos', name:'Marcos Souza', ini:'MS', role:'Operador', mod:'Estoque', org:'Montadora · Almoxarifado', icon:'warehouse', device:'mob', first:'Marcos'},
+  fernanda:{id:'fernanda', name:'Fernanda Rocha', ini:'FR', role:'Técnica', mod:'Testes', org:'Montadora · Oficina de Protótipos', icon:'flask-conical', device:'mob', first:'Fernanda'}
+};
+const MENUS = {
+  carla:   [['F-ADM1','Painel','layout-dashboard'],['F-ADM2','Ordens de Produção','clipboard-list'],['F-ADM3','Validação de Carga','truck']],
+  ricardo: [['E-ADM1','Painel','layout-dashboard'],['E-ADM2','Pedidos de Kits','boxes'],['E-ADM3','Mapeamento do Galpão','map-pin'],['E-ADM4','Rastreabilidade','history']],
+  juliana: [['T-ADM1','Painel','layout-dashboard'],['T-ADM2','Nova Requisição','plus'],['T-ADM3','Acompanhamento de Kits','square-kanban']],
+  bruno:   [['F-FUNC1','Lotes','house'],['F-FUNC2','Etiquetas','printer'],['F-FUNC3','Carregamento','scan-barcode']],
+  marcos:  [['E-FUNC1','Tarefas','inbox'],['E-FUNC2','Recebimento','package-check'],['E-FUNC3','Coleta','route'],['E-FUNC4','Expedição','truck']],
+  fernanda:[['T-FUNC1','Kits','house'],['T-FUNC2','Conferência','clipboard-check']]
+};
+const PROTOS = {
+  suv:    {name:'SUV X – Teste de Pista', status:'Em Montagem'},
+  pickup: {name:'Pickup Pro – Teste de Frenagem', status:'Parado por Peça Blocante'},
+  hatch:  {name:'Hatch E-Tech – Teste de Durabilidade', status:'Pronto para Teste'}
+};
+const KIT142 = [
+  {p:'Pinça de freio dianteira', q:2, b:true,  addr:'Corredor A · Prateleira 02 · Nível 1 · Caixa 04', c:'A', s:2, code:'PC-000098'},
+  {p:'Suporte do motor',          q:2, b:true,  addr:'Corredor B · Prateleira 04 · Nível 2 · Caixa 01', c:'B', s:4, code:'PC-000121'},
+  {p:'Chicote elétrico do painel',q:1, b:true,  addr:'Corredor B · Prateleira 07 · Nível 1 · Caixa 02', c:'B', s:7, code:'PC-000133'},
+  {p:'Módulo de ECU',             q:1, b:true,  addr:'Corredor C · Prateleira 01 · Nível 3 · Caixa 05', c:'C', s:1, code:'PC-000150'},
+  {p:'Amortecedor traseiro',      q:2, b:false, addr:'Corredor D · Prateleira 03 · Nível 1 · Caixa 02', c:'D', s:3, code:'PC-000164'},
+  {p:'Farol LED esquerdo',        q:1, b:false, addr:null, c:null, s:null, code:null, missing:true}
+];
+const CATALOG = [
+  ['Pinça de freio dianteira','PN 44-1021',true],['Pinça de freio traseira','PN 44-1022',true],['Disco de freio ventilado','PN 44-2040',true],
+  ['Suporte do motor','PN 21-0310',true],['Módulo de ECU','PN 70-0001',true],['Chicote elétrico do painel','PN 63-1180',true],
+  ['Amortecedor traseiro','PN 32-0712',false],['Farol LED esquerdo','PN 81-0450',false],['Farol LED direito','PN 81-0451',false],['Sensor de estacionamento','PN 66-0099',false]
+];
+const NOTES = {
+  carla:[['triangle-alert','accent','MN-0451 com problema: 1 amortecedor avariado apontado pelo Estoque.','22/09 · 15:10'],['clipboard-list','data','Nova ordem OP-3310: Farol LED esquerdo ×10 (reposição do KT-0142).','24/09 · 11:02'],['scan-barcode','data','Bruno Lima está conferindo a carga MN-0457.','25/09 · 16:20']],
+  ricardo:[['lock','danger','KT-0139 travado: falta Pinça de freio traseira (BLOCANTE).','25/09 · 09:41'],['package','data','Carga MN-0457 prevista na doca hoje às 17:30.','25/09 · 16:50'],['boxes','data','Juliana Costa solicitou o kit KT-0145 (Hatch E-Tech).','25/09 · 10:05'],['triangle-alert','warning','Farol LED esquerdo abaixo do estoque mínimo (0 de 2).','24/09 · 10:37']],
+  juliana:[['circle-alert','warning','KT-0142 será entregue parcial: Farol LED esquerdo em falta.','24/09 · 10:40'],['lock','danger','Pickup Pro parado: KT-0139 aguarda Pinça de freio traseira.','25/09 · 09:41'],['circle-check','success','Hatch E-Tech pronto para o Teste de Durabilidade.','25/09 · 08:15']],
+  bruno:[['clipboard-list','data','OP-3310 aguardando liberação de Carla Mendes.','25/09 · 08:00'],['truck','data','Carga MN-0457: carregamento às 16:00.','25/09 · 07:30'],['triangle-alert','accent','MN-0451 voltou com 1 peça avariada.','22/09 · 15:10']],
+  marcos:[['package','data','MN-0457 chega na doca 2 às 17:30.','25/09 · 16:50'],['route','data','Nova coleta atribuída: KT-0142 (prioridade Alta).','25/09 · 09:00'],['lock','danger','KT-0139 travado até chegar a Pinça de freio traseira.','25/09 · 09:41']],
+  fernanda:[['truck','data','KT-0142 em separação no Estoque.','25/09 · 09:00'],['circle-alert','warning','KT-0142 virá sem o Farol LED esquerdo (autorizado).','24/09 · 10:40'],['circle-check','success','Hatch E-Tech liberado para o Teste de Durabilidade.','25/09 · 08:15']]
+};
+
+/* ===== Estado em memória ===== */
+function fresh(){
+  return {
+    device:'web', prof:{web:null, mob:null}, scr:{web:null, mob:null}, theme:{web:'light', mob:'light'},
+    pop:null, modal:null, toasts:[], lock:null,
+    ops:{'OP-3310':'Pendente','OP-3308':'Pendente','OP-3306':'Liberado','OP-3302':'Concluída','OP-3299':'Concluída'},
+    opSel:'OP-3310', opQty:10, opPart:'Farol LED esquerdo',
+    mn0457:'Em Conferência', // → Aguardando Aprovação → Em Trânsito → Recebido
+    labels:{lote:'OP-3310', printed:false},
+    load:{reads:['PC-000201','PC-000202','PC-000203','PC-000204','PC-000205','PC-000206'].map((c,i)=>({c,ok:true,t:'16:'+(21+i*2)})), seq:0, last:null},
+    recv:{reads:[], seq:0, last:null, photo:false, damage:false},
+    kits:{'KT-0142':'Em Separação','KT-0139':'Em Separação','KT-0145':'Aguardando Separação','KT-0138':'Entregue Completo','KT-0136':'Entregue Completo'},
+    extraKits:[],
+    queue:['KT-0142','KT-0139','KT-0145'], assignee:{'KT-0142':'Marcos Souza','KT-0139':'Marcos Souza','KT-0145':''},
+    route:{idx:0, badTried:false, last:null},
+    ship:{scanned:false, carrier:'', last:null},
+    accept:{got:[], seq:0, last:null, reported:false},
+    req:{proto:'hatch', items:[['Disco de freio ventilado',4,true],['Sensor de estacionamento',2,false]], partial:true, prio:'Média', q:''},
+    trace:{q:'PC-000098', mode:'Código'},
+    kview:'kanban', ksel:'KT-0142', tab:{marcos:'Recebimentos', ordersTab:'Todas'},
+    map:{c:'D', s:'05', n:'2', b:'03'}
+  };
+}
+let S = fresh();
+
+/* ===== Utilitários ===== */
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ic = (n, cls='') => `<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n]||''}</svg>`;
+const tagB = b => b ? `<span class="tp-tag tp-tag--blocante">${ic('lock')}BLOCANTE</span>` : `<span class="tp-tag tp-tag--nao">NÃO-BLOCANTE</span>`;
+const sortTh = (t, al='') => `<th${al?` style="text-align:${al}"`:''}>${t}<span class="sort">${ic('chevrons-up-down')}</span></th>`;
+const kitProto = k => ({'KT-0142':PROTOS.suv.name,'KT-0139':PROTOS.pickup.name,'KT-0145':PROTOS.hatch.name,'KT-0138':PROTOS.hatch.name,'KT-0136':PROTOS.suv.name}[k] || (S.extraKits.find(x=>x.id===k)||{}).proto || '');
+const allKits = () => ['KT-0145','KT-0142','KT-0139','KT-0138','KT-0136', ...S.extraKits.map(x=>x.id)];
+function qr(seed, size=64){
+  let h=0; for(const ch of seed) h=(h*31+ch.charCodeAt(0))>>>0;
+  const n=21, u=size/n; let r='';
+  const rnd=()=>{h^=h<<13;h>>>=0;h^=h>>17;h^=h<<5;h>>>=0;return h/4294967296;};
+  const finder=(x,y)=>`<rect x="${x*u}" y="${y*u}" width="${7*u}" height="${7*u}" fill="currentColor"/><rect x="${(x+1)*u}" y="${(y+1)*u}" width="${5*u}" height="${5*u}" fill="#fff"/><rect x="${(x+2)*u}" y="${(y+2)*u}" width="${3*u}" height="${3*u}" fill="currentColor"/>`;
+  for(let y=0;y<n;y++)for(let x=0;x<n;x++){ if((x<8&&y<8)||(x>12&&y<8)||(x<8&&y>12)) continue; if(rnd()>.52) r+=`<rect x="${x*u}" y="${y*u}" width="${u+.2}" height="${u+.2}"/>`; }
+  return `<svg class="qr" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" style="color:#111"><rect width="${size}" height="${size}" fill="#fff"/><g fill="currentColor">${r}</g>${finder(0,0)}${finder(14,0)}${finder(0,14)}</svg>`;
+}
+function statusCls(s){
+  if(/Recebido|Concluída|Entregue Completo|Pronto|Disponível|Liberado|OK|Lida/.test(s)) return 'ok';
+  if(/Problema|Parado|Indisponível|Travad|Faltou|Cancel/.test(s)) return 'bad';
+  if(/Parcial|Aguardando Aprovação|Conferência/.test(s)) return 'warn';
+  if(/Pendente|Aguardando/.test(s)) return 'accent';
+  return 'info';
+}
+const st = s => `<span class="tp-status tp-status--${statusCls(s)}">${esc(s)}</span>`;
+
+/* ===== Gráficos em SVG ===== */
+function smooth(pts){
+  let d=`M${pts[0][0]},${pts[0][1]}`;
+  for(let i=0;i<pts.length-1;i++){
+    const p0=pts[i-1]||pts[i], p1=pts[i], p2=pts[i+1], p3=pts[i+2]||p2;
+    const c1=[p1[0]+(p2[0]-p0[0])/6, p1[1]+(p2[1]-p0[1])/6], c2=[p2[0]-(p3[0]-p1[0])/6, p2[1]-(p3[1]-p1[1])/6];
+    d+=` C${c1[0].toFixed(1)},${c1[1].toFixed(1)} ${c2[0].toFixed(1)},${c2[1].toFixed(1)} ${p2[0]},${p2[1]}`;
+  }
+  return d;
+}
+let gid=0;
+function lineChart({w=640,h=240,labels,series,max,ticks,fmt=v=>v,marks=[],vgrid=false}){
+  const L=44,R=16,T=26,B=28, iw=w-L-R, ih=h-T-B;
+  const x=i=>L+iw*i/(labels.length-1), y=v=>T+ih*(1-v/max);
+  let s=`<svg class="tp-chart" viewBox="0 0 ${w} ${h}" role="img">`;
+  for(const t of ticks) s+=`<line class="grid" x1="${L}" x2="${w-R}" y1="${y(t)}" y2="${y(t)}"/><text x="${L-8}" y="${y(t)+4}" text-anchor="end">${fmt(t)}</text>`;
+  if(vgrid) labels.forEach((_,i)=>s+=`<line class="grid" x1="${x(i)}" x2="${x(i)}" y1="${T}" y2="${T+ih}"/>`);
+  labels.forEach((l,i)=>s+=`<text x="${x(i)}" y="${h-8}" text-anchor="middle">${l}</text>`);
+  for(const se of series){
+    const pts=se.vals.map((v,i)=>[+x(i).toFixed(1),+y(v).toFixed(1)]); const d=smooth(pts);
+    if(se.fill){ const id='g'+(++gid); s+=`<defs><linearGradient id="${id}" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="${se.color}" stop-opacity=".35"/><stop offset="1" stop-color="${se.color}" stop-opacity="0"/></linearGradient></defs><path d="${d} L${pts.at(-1)[0]},${T+ih} L${pts[0][0]},${T+ih} Z" fill="url(#${id})"/>`; }
+    s+=`<path d="${d}" fill="none" stroke="${se.color}" stroke-width="2.5" stroke-linecap="round"/>`;
+    if(se.dots) pts.forEach(p=>s+=`<circle cx="${p[0]}" cy="${p[1]}" r="4.5" fill="${se.color}" stroke="var(--surface)" stroke-width="2"/>`);
+  }
+  for(const m of marks){
+    const px=x(m.i), py=y(series[m.s].vals[m.i]); const tw=m.label.length*6.2+16;
+    s+=`<circle cx="${px}" cy="${py}" r="5" fill="${m.color}" stroke="var(--surface)" stroke-width="2"/><rect x="${px-tw/2}" y="${py-32}" width="${tw}" height="20" rx="4" fill="${m.color}"/><path d="M${px-5},${py-12.5} L${px},${py-7} L${px+5},${py-12.5}Z" fill="${m.color}"/><text x="${px}" y="${py-18}" text-anchor="middle" style="fill:#fff;font-weight:700;font-size:10.5px">${m.label}</text>`;
+  }
+  return s+'</svg>';
+}
+function gauge(val,{w=220,label='',unit='%',max=100,split=.6,c1='var(--accent)',c2='var(--success)'}={}){
+  const cx=w/2, cy=w*.52, r=w*.36, sw=w*.075;
+  const pt=a=>[cx+r*Math.cos(Math.PI*(1-a)), cy-r*Math.sin(Math.PI*(1-a))];
+  const arc=(a0,a1,col)=>{const [x0,y0]=pt(a0),[x1,y1]=pt(a1);return `<path d="M${x0.toFixed(1)},${y0.toFixed(1)} A${r},${r} 0 0 1 ${x1.toFixed(1)},${y1.toFixed(1)}" fill="none" stroke="${col}" stroke-width="${sw}" stroke-linecap="round"/>`;};
+  const f=Math.min(val/max,1), [nx,ny]=[cx+(r-sw*.2)*Math.cos(Math.PI*(1-f)), cy-(r-sw*.2)*Math.sin(Math.PI*(1-f))];
+  return `<svg class="tp-chart" viewBox="0 0 ${w} ${w*.72}" style="max-width:${w}px;margin:auto">${arc(0,split,c1)}${arc(split,1,c2)}
+  <line x1="${cx}" y1="${cy}" x2="${nx.toFixed(1)}" y2="${ny.toFixed(1)}" stroke="var(--text)" stroke-width="4" stroke-linecap="round"/><circle cx="${cx}" cy="${cy}" r="8" fill="var(--surface)" stroke="var(--text)" stroke-width="4"/>
+  <text x="${cx-r}" y="${cy+26}" text-anchor="middle">0${unit}</text><text x="${cx+r}" y="${cy+26}" text-anchor="middle">${max}${unit}</text>
+  <text x="${cx}" y="${cy+44}" text-anchor="middle" style="fill:var(--text);font-size:26px;font-weight:800">${String(val).replace('.',',')}<tspan style="font-size:14px">${unit}</tspan></text></svg>${label?`<div class="tp-cap" style="text-align:center">${label}</div>`:''}`;
+}
+function pie(a,b,la,lb){
+  const cx=90,cy=90,r=72, f=a/(a+b), ang=f*2*Math.PI;
+  const p=(t,rr=r,ox=0,oy=0)=>[ox+cx+rr*Math.sin(t), oy+cy-rr*Math.cos(t)];
+  const off=[8*Math.sin(ang/2),-8*Math.cos(ang/2)];
+  const [x1,y1]=p(0,r,...off),[x2,y2]=p(ang,r,...off),[x3,y3]=p(ang),[x4,y4]=p(2*Math.PI-0.0001);
+  const [lx,ly]=p(ang/2,r*.6,...off),[mx,my]=p(ang+(2*Math.PI-ang)/2,r*.55);
+  return `<svg class="tp-chart" viewBox="0 0 180 180" style="max-width:180px">
+  <path d="M${cx},${cy} L${x3},${y3} A${r},${r} 0 ${ang<Math.PI?1:0} 1 ${x4},${y4} Z" fill="var(--data)"/>
+  <path d="M${cx+off[0]},${cy+off[1]} L${x1},${y1} A${r},${r} 0 ${ang>Math.PI?1:0} 1 ${x2},${y2} Z" fill="var(--data-light)"/>
+  <text x="${lx}" y="${ly+5}" text-anchor="middle" style="fill:#1E2F38;font-weight:800;font-size:14px">${la}</text><text x="${mx}" y="${my+5}" text-anchor="middle" style="fill:#fff;font-weight:800;font-size:14px">${lb}</text></svg>`;
+}
+const legend = items => `<div class="tp-legend">${items.map(([c,t])=>`<span><i style="background:${c}"></i>${t}</span>`).join('')}</div>`;
+
+/* ===== Definições auxiliares ===== */
+const OPS = [
+  {id:'OP-3310', part:'Farol LED esquerdo', q:10, req:'24/09', due:'26/09', why:'Reposição do KT-0142'},
+  {id:'OP-3308', part:'Pinça de freio traseira', q:4, req:'25/09', due:'27/09', why:'Destrava o KT-0139'},
+  {id:'OP-3306', part:'Amortecedor traseiro', q:6, req:'23/09', due:'25/09', why:'Reposição da avaria na MN-0451'},
+  {id:'OP-3302', part:'Suporte do motor', q:8, req:'20/09', due:'22/09', why:'Estoque de segurança'},
+  {id:'OP-3299', part:'Chicote elétrico do painel', q:5, req:'18/09', due:'21/09', why:'Estoque de segurança'}
+];
+const KITDEF = {
+  'KT-0139':{prio:'Alta', items:[['Pinça de freio traseira',2,true,'miss'],['Disco de freio ventilado',2,true],['Sensor de estacionamento',1,false]]},
+  'KT-0145':{prio:'Média', items:[['Módulo de ECU',1,true],['Amortecedor traseiro',4,false],['Sensor de estacionamento',2,false]]},
+  'KT-0138':{prio:'Baixa', items:[['Chicote elétrico do painel',1,true],['Farol LED direito',1,false]]},
+  'KT-0136':{prio:'Média', items:[['Pinça de freio dianteira',2,true],['Disco de freio ventilado',2,true]]}
+};
+const kitPrio = k => k==='KT-0142' ? 'Alta' : (KITDEF[k]||S.extraKits.find(x=>x.id===k)||{}).prio || 'Média';
+const kitItems = k => k==='KT-0142' ? KIT142.map(i=>[i.p,i.q,i.b,i.missing?'miss':'']) : (KITDEF[k]||{}).items || (S.extraKits.find(x=>x.id===k)||{}).items || [];
+const kitAvail = k => ({'KT-0142':'Parcial','KT-0139':'Indisponível'}[k] || 'Disponível');
+const prioTag = p => `<span class="tp-tag ${p==='Alta'?'tp-tag--blocante':p==='Média'?'tp-tag--warn':'tp-tag--info'}">${p==='Alta'?'ALTA / URGENTE':p.toUpperCase()}</span>`;
+const kitStatus = k => k==='KT-0139' ? 'Travado' : S.kits[k];
+const card = (title, body, extra='', style='') => `<section class="tp-card" style="${style}"><div class="tp-card__head"><h2 class="tp-h2">${title}</h2>${extra}</div>${body}</section>`;
+const span = (n, html) => `<div style="grid-column:span ${n};min-width:0">${html}</div>`;
+const kpi = (icon, num, label, variant='', info=false) => `<div class="tp-kpi ${variant==='alert'?'tp-kpi--alert':''}"><div class="tp-iconbox ${variant==='alert'?'tp-iconbox--accent':variant==='data'?'tp-iconbox--data':''}">${ic(icon)}</div><div><div class="tp-kpi__num">${num}</div><div class="tp-kpi__label">${label}</div></div>${info?`<span class="tp-kpi__info" title="Detalhes">${ic('info')}</span>`:''}</div>`;
+const loadOk = () => S.load.reads.filter(r=>r.ok).map(r=>r.c);
+
+/* ===== FORNECEDOR ADM ===== */
+function F_ADM1(){
+  const pend = Object.values(S.ops).filter(v=>v==='Pendente').length;
+  const trans = 2 + (S.mn0457==='Em Trânsito'?1:0);
+  const mnSt = {'Em Conferência':'Em Conferência','Aguardando Aprovação':'Aguardando Aprovação','Em Trânsito':'Em Trânsito','Recebido':'Recebido'}[S.mn0457];
+  const rows = [['MN-0457','Farol LED esquerdo ×'+loadOk().length,'25/09',mnSt,'Doca 2 · Montadora'],['MN-0455','Suporte do motor ×8','24/09','Em Trânsito','Doca 1 · Montadora'],['MN-0453','Chicote elétrico do painel ×5','23/09','Em Trânsito','Doca 1 · Montadora'],['MN-0451','Pinça de freio dianteira ×6 · Amortecedor traseiro ×4','22/09','Com Problema','Doca 2 · Montadora'],['MN-0448','Módulo de ECU ×3','19/09','Recebido','Doca 1 · Montadora']];
+  return `<div class="tp-grid">
+  ${span(12, card('Visão geral', `<div class="tp-grid" style="grid-template-columns:repeat(4,1fr)">
+    ${kpi('clipboard-list', pend, 'Ordens pendentes')}${kpi('package-check', 18, 'Ordens concluídas no mês')}${kpi('truck', trans, 'Remessas em trânsito')}${kpi('triangle-alert', 2, 'Divergências', 'alert', true)}</div>`))}
+  ${span(8, card('Ordens pendentes x concluídas', lineChart({w:720,h:250,labels:['Sem 34','Sem 35','Sem 36','Sem 37','Sem 38','Sem 39'],max:16,ticks:[0,4,8,12,16],series:[{vals:[6,5,7,4,5,pend+3],color:'var(--accent)',fill:true},{vals:[8,10,9,12,11,13],color:'var(--success)',fill:true}],marks:[{i:3,s:1,label:'Pico de entregas',color:'var(--success)'},{i:2,s:0,label:'Mais pendências',color:'var(--accent)'}]}), `<div class="tp-row">${legend([['var(--accent)','Pendentes'],['var(--success)','Concluídas']])}<span class="tp-cap">Últimas 6 semanas</span></div>`))}
+  ${span(4, card('Divergências abertas', `<div class="tp-stack" style="gap:12px">
+    <div class="tp-banner tp-banner--bad">${ic('triangle-alert')}<div><b>MN-0451 · Com Problema</b><p>1 amortecedor traseiro avariado, apontado por Marcos Souza (Estoque). Reposição na OP-3306.</p></div></div>
+    <div class="tp-banner tp-banner--warn">${ic('circle-alert')}<div><b>MN-0457 · ${loadOk().length} de 10 peças</b><p>${10-loadOk().length} etiquetas não foram bipadas no carregamento.</p></div></div>
+    <button class="tp-btn tp-btn--outline" data-a="go" data-v="F-ADM3">Ver conferência da MN-0457</button></div>`))}
+  ${span(12, card('Últimas remessas', `<div class="tp-table-wrap"><table class="tp-table"><thead><tr>${sortTh('Remessa')}${sortTh('Conteúdo')}${sortTh('Saída')}${sortTh('Destino')}${sortTh('Status')}</tr></thead><tbody>
+    ${rows.map(r=>`<tr${r[0]==='MN-0457'?' class="is-clickable" data-a="go" data-v="F-ADM3"':''}><td><b>${r[0]}</b></td><td>${r[1]}</td><td class="num">${r[2]}</td><td>${r[4]}</td><td>${st(r[3])}</td></tr>`).join('')}</tbody></table></div>`,
+    `<div class="tp-row"><span class="tp-date">${ic('calendar')}19-09-2026</span><span class="tp-muted">até</span><span class="tp-date">${ic('calendar')}25-09-2026</span></div>`))}
+  </div>`;
+}
+function F_ADM2(){
+  const f = S.tab.ordersTab;
+  const list = OPS.filter(o => f==='Todas' || (f==='Pendentes'&&S.ops[o.id]==='Pendente') || (f==='Liberadas'&&S.ops[o.id]==='Liberado') || (f==='Concluídas'&&S.ops[o.id]==='Concluída'));
+  const o = OPS.find(x=>x.id===S.opSel); const done = S.ops[o.id]!=='Pendente';
+  const count = t => OPS.filter(x => t==='Todas' || ({Pendentes:'Pendente',Liberadas:'Liberado',Concluídas:'Concluída'}[t]===S.ops[x.id])).length;
+  return `<div class="tp-grid">
+  ${span(8, card('Solicitações de fabricação da Montadora', `<div class="tp-tabs" style="margin-bottom:16px">${['Todas','Pendentes','Liberadas','Concluídas'].map(t=>`<button class="tp-tab ${f===t?'on':''}" data-a="opsTab" data-v="${t}">${t}<span class="count">${count(t)}</span></button>`).join('')}</div>
+   ${list.length?`<div class="tp-table-wrap"><table class="tp-table"><thead><tr>${sortTh('Ordem')}${sortTh('Peça')}${sortTh('Qtd','right')}${sortTh('Prazo')}${sortTh('Status')}</tr></thead><tbody>
+   ${list.map(x=>`<tr class="is-clickable ${x.id===S.opSel?'is-selected':''}" data-a="opSel" data-v="${x.id}"><td><b>${x.id}</b><div class="tp-cap">${x.why}</div></td><td>${x.part}</td><td class="num" style="text-align:right">${x.q}</td><td class="num">${x.due}/2026</td><td>${st(S.ops[x.id])}</td></tr>`).join('')}</tbody></table></div>`
+   : `<div class="tp-empty"><div class="ring">${ic('inbox')}</div><b>Nenhuma ordem nesta aba</b><span>As ordens aparecem aqui quando mudam de status.</span></div>`}`))}
+  ${span(4, card('Liberar lote', `<div class="tp-stack" style="gap:14px">
+    <div class="tp-row" style="justify-content:space-between"><div><div class="tp-h3">${o.id}</div><div class="tp-cap">Solicitada em ${o.req}/2026 · ${o.why}</div></div>${st(S.ops[o.id])}</div>
+    <div><label class="tp-label" for="op-part">Tipo de peça</label><select id="op-part" class="tp-select" ${done?'disabled':''}>${CATALOG.map(c=>`<option ${c[0]===o.part?'selected':''}>${c[0]}</option>`).join('')}</select></div>
+    <div class="tp-grid" style="grid-template-columns:1fr 1fr;gap:12px"><div><label class="tp-label" for="op-qty">Quantidade</label><input id="op-qty" class="tp-input num" type="number" value="${o.q}" ${done?'disabled':''}></div>
+    <div><label class="tp-label" for="op-lote">Lote de matéria-prima</label><input id="op-lote" class="tp-input" value="${o.id==='OP-3310'?'LT-2026-088':'LT-2026-091'}" ${done?'disabled':''}></div></div>
+    ${done ? `<div class="tp-banner tp-banner--ok">${ic('circle-check')}<div><b>Lote liberado para etiquetagem</b><p>${o.id==='OP-3310'?'Bruno Lima já vê o OP-3310 no app.':'Disponível para a produção.'}</p></div></div>`
+      : `<div class="tp-banner tp-banner--info">${ic('info')}<div><b>Ao liberar</b><p>O lote aparece no app do operador de produção para etiquetar.</p></div></div>`}
+    <button class="tp-btn tp-btn--primary tp-btn--block" data-a="releaseOp" ${done?'disabled':''}>${ic(done?'check':'send')}${done?'Lote liberado':'Liberar Lote para Etiquetagem'}</button></div>`))}
+  </div>`;
+}
+function F_ADM3(){
+  const ok = loadOk(), all = Array.from({length:10},(_,i)=>'PC-0002'+String(i+1).padStart(2,'0'));
+  const dup = S.load.reads.filter(r=>!r.ok);
+  const s = S.mn0457, pending = s==='Em Conferência', approved = s==='Em Trânsito'||s==='Recebido';
+  return `<div class="tp-grid">
+  ${span(12, `<section class="tp-card"><div class="tp-card__head"><div><h2 class="tp-h2">Carga MN-0457 · Farol LED esquerdo</h2><div class="tp-cap">OP-3310 · Lote LT-2026-088 · Conferida por Bruno Lima · Destino: Doca 2 da Montadora</div></div>${st(s)}</div>
+   ${pending?`<div class="tp-banner tp-banner--info" style="margin-bottom:16px">${ic('scan-barcode')}<div><b>Conferência em andamento no app</b><p>Bruno Lima bipou ${ok.length} de 10 peças. A expedição fica bloqueada até ele enviar a conferência. <button class="tp-link" data-a="simSend">Simular envio do operador</button></p></div></div>`:''}
+   ${approved?`<div class="tp-banner tp-banner--ok" style="margin-bottom:16px">${ic('truck')}<div><b>Expedição autorizada</b><p>A carga saiu com ${ok.length} peças. ${s==='Recebido'?'Recebida pela Montadora.':'O Estoque vê a MN-0457 na fila de recebimentos.'}</p></div></div>`:''}
+   <div class="tp-grid" style="grid-template-columns:repeat(4,1fr);gap:12px"><div class="tp-stat"><b>10</b><span>Esperadas</span></div><div class="tp-stat tp-stat--ok"><b>${ok.length}</b><span>Lidas</span></div><div class="tp-stat tp-stat--bad"><b>${10-ok.length}</b><span>Faltaram</span></div><div class="tp-stat tp-stat--warn"><b>${dup.length}</b><span>Leituras repetidas</span></div></div></section>`)}
+  ${span(8, card('Conferência peça a peça', `<div class="tp-table-wrap"><table class="tp-table"><thead><tr>${sortTh('Etiqueta')}${sortTh('Numeração')}${sortTh('Leitura')}${sortTh('Situação')}</tr></thead><tbody>
+   ${all.map((c,i)=>{const r=S.load.reads.find(x=>x.c===c&&x.ok);return `<tr class="${r?'':'is-bad'}"><td><b class="num">${c}</b></td><td>Peça ${String(i+1).padStart(2,'0')}/10</td><td class="num">${r?'25/09 · '+r.t:'—'}</td><td>${r?`<span class="tp-status tp-status--ok">${ic('circle-check')}Lida</span>`:`<span class="tp-status tp-status--bad">${ic('circle-x')}Faltou</span>`}</td></tr>`;}).join('')}
+   ${dup.map(d=>`<tr class="is-warn"><td><b class="num">${d.c}</b></td><td>Leitura repetida</td><td class="num">25/09 · ${d.t}</td><td><span class="tp-status tp-status--warn">${ic('triangle-alert')}Ignorada</span></td></tr>`).join('')}
+   </tbody></table></div>`))}
+  ${span(4, card('Divergências', `<div class="tp-stack" style="gap:12px">
+   ${10-ok.length?`<div class="tp-banner tp-banner--bad">${ic('circle-x')}<div><b>Faltaram ${10-ok.length} peças</b><p>${all.filter(c=>!ok.includes(c)).join(', ')}</p></div></div>`:''}
+   ${dup.length?`<div class="tp-banner tp-banner--warn">${ic('triangle-alert')}<div><b>${dup.length} leitura repetida</b><p>${dup.map(d=>d.c).join(', ')} foi bipada duas vezes. A segunda leitura não conta.</p></div></div>`:''}
+   <div class="tp-banner tp-banner--info">${ic('info')}<div><b>Sobraram 0 peças</b><p>Nenhuma etiqueta de fora da OP-3310 foi lida.</p></div></div>
+   <button class="tp-btn tp-btn--primary tp-btn--block" data-a="authorize" ${pending||approved?'disabled':''}>${ic(approved?'check':'truck')}${approved?'Expedição autorizada':'Autorizar Expedição'}</button>
+   ${pending?`<div class="tp-cap" style="text-align:center">${ic('lock')} Aguardando envio da conferência</div>`:''}
+   ${!pending&&!approved?`<button class="tp-btn tp-btn--ghost tp-btn--block" data-a="toast" data-v="warn|Carga devolvida para Bruno Lima conferir de novo.">Devolver para nova conferência</button>`:''}</div>`))}
+  </div>`;
+}
+
+/* ===== ESTOQUE ADM ===== */
+function E_ADM1(){
+  const farol = S.mn0457==='Recebido' ? 7 : 0;
+  const alerts=[['Pinça de freio traseira',0,4,true],['Farol LED esquerdo',farol,2,false],['Amortecedor traseiro',3,6,false],['Módulo de ECU',2,3,true],['Sensor de estacionamento',5,8,false]];
+  return `<div class="tp-grid">
+  ${span(8, card('Nível de estoque', lineChart({w:720,h:260,labels:['Abr','Mai','Jun','Jul','Ago','Set'],max:2500,ticks:[0,500,1000,1500,2000,2500],fmt:v=>v.toLocaleString('pt-BR'),vgrid:true,series:[{vals:[1840,1910,1780,2050,1990,2120],color:'var(--data)',fill:true,dots:true},{vals:[420,510,460,630,580,700],color:'var(--accent)',dots:true}],marks:[{i:5,s:1,label:'700 reservadas',color:'var(--accent)'}]}), legend([['var(--data)','Peças totais'],['var(--accent)','Reservadas para kits']])))}
+  ${span(4, card('Kits críticos', `<div class="tp-stack" style="gap:12px">
+    <div class="tp-banner tp-banner--bad" style="flex-direction:column;gap:8px"><div class="tp-row" style="justify-content:space-between;width:100%"><b>${ic('lock')} KT-0139</b>${prioTag('Alta')}</div><p style="margin:0">${PROTOS.pickup.name}</p><div class="tp-row" style="gap:8px"><span style="color:var(--text);font-weight:600">Falta: Pinça de freio traseira</span>${tagB(true)}</div><p style="margin:0" class="tp-cap">Coleta travada · Reposição na OP-3308 (MetalSul)</p></div>
+    <div class="tp-banner tp-banner--warn" style="flex-direction:column;gap:8px"><div class="tp-row" style="justify-content:space-between;width:100%"><b>KT-0142 · parcial</b>${prioTag('Alta')}</div><p style="margin:0">${PROTOS.suv.name}</p><div class="tp-row" style="gap:8px"><span style="color:var(--text);font-weight:600">Falta: Farol LED esquerdo</span>${tagB(false)}</div><p style="margin:0" class="tp-cap">Envio parcial autorizado por Juliana Costa</p></div>
+    <button class="tp-btn tp-btn--outline" data-a="go" data-v="E-ADM2">Abrir pedidos de kits</button></div>`))}
+  ${span(3, card('Tempo médio de montagem', gauge(42,{max:60,unit:' min',split:.75,c1:'var(--success)',c2:'var(--accent)',label:'Meta: até 45 min por kit'})))}
+  ${span(3, card('Acuracidade do inventário', gauge(97.8,{split:.9,label:'Último inventário cíclico: 23/09'})))}
+  ${span(6, card('Alertas de estoque mínimo', `<div class="tp-table-wrap"><table class="tp-table"><thead><tr>${sortTh('Peça')}${sortTh('Em estoque','right')}${sortTh('Mínimo','right')}${sortTh('Situação')}</tr></thead><tbody>
+    ${alerts.map(a=>`<tr><td><div style="display:flex;flex-direction:column;gap:4px;align-items:flex-start"><b>${a[0]}</b>${tagB(a[3])}</div></td><td class="num" style="text-align:right">${a[1]}</td><td class="num" style="text-align:right">${a[2]}</td><td>${a[1]===0?st('Zerado · Indisponível'):a[1]<a[2]?`<span class="tp-status tp-status--warn">Abaixo do mínimo</span>`:st('OK')}</td></tr>`).join('')}</tbody></table></div>`))}
+  </div>`;
+}
+function E_ADM2(){
+  const q = S.queue;
+  return `<div class="tp-stack">
+  <div class="tp-banner tp-banner--bad">${ic('lock')}<div><b>KT-0139 travado</b><p>Falta Pinça de freio traseira (BLOCANTE). A coleta só pode ser disparada quando a OP-3308 chegar da MetalSul.</p></div></div>
+  ${card('Pedidos de kits do Testes', `<div class="tp-table-wrap"><table class="tp-table"><thead><tr><th>Fila</th>${sortTh('Kit')}${sortTh('Peças')}${sortTh('Prioridade')}${sortTh('Disponibilidade')}<th>Responsável</th>${sortTh('Status')}<th></th></tr></thead><tbody>
+  ${q.map((k,i)=>{const items=kitItems(k), hasB=items.some(x=>x[2]), stt=kitStatus(k), av=kitAvail(k), canGo=S.kits[k]==='Aguardando Separação'&&av!=='Indisponível';
+   return `<tr><td><div class="tp-row" style="gap:4px;flex-wrap:nowrap"><span class="num" style="font-weight:800;width:18px">${i+1}º</span><button class="tp-icon-btn" style="width:30px;height:30px" data-a="prio" data-v="${k}|-1" ${i===0?'disabled':''} aria-label="Subir na fila">${ic('arrow-up')}</button><button class="tp-icon-btn" style="width:30px;height:30px" data-a="prio" data-v="${k}|1" ${i===q.length-1?'disabled':''} aria-label="Descer na fila">${ic('arrow-down')}</button></div></td>
+   <td><b>${k}</b><div class="tp-cap">${kitProto(k)}</div></td>
+   <td><div style="display:flex;flex-direction:column;gap:4px;align-items:flex-start"><span>${items.length} itens</span>${hasB?`<span class="tp-tag tp-tag--blocante">${ic('lock')}Contém BLOCANTE</span>`:''}</div></td>
+   <td>${prioTag(kitPrio(k))}</td><td>${st(av)}</td>
+   <td><select class="tp-select" style="width:160px;height:36px" data-a="assign" data-v="${k}" aria-label="Responsável por ${k}"><option value="">Selecionar…</option>${['Marcos Souza','Diego Martins'].map(n=>`<option ${S.assignee[k]===n?'selected':''}>${n}</option>`).join('')}</select></td>
+   <td>${st(stt)}</td>
+   <td>${stt==='Travado'?`<button class="tp-btn tp-btn--sm tp-btn--outline" disabled>${ic('lock')}Travado</button>`:canGo?`<button class="tp-btn tp-btn--sm tp-btn--primary" data-a="dispatch" data-v="${k}">${ic('send')}Disparar Ordem de Coleta</button>`:`<span class="tp-cap">Coleta disparada</span>`}</td></tr>`;}).join('')}
+  </tbody></table></div>`, `<span class="tp-cap">Solicitados por Juliana Costa · Testes</span>`)}
+  </div>`;
+}
+function E_ADM3(){
+  const m=S.map, rows=['A','B','C','D','E'];
+  const hits=KIT142.filter(i=>i.c).map(i=>i.c+i.s);
+  const used=['A1','A3','A5','B1','B2','B5','C2','C3','C6','D1','D5','D6','E2','E7'];
+  return `<div class="tp-grid">
+  ${span(4, card('Cadastrar endereço', `<form class="tp-stack" style="gap:14px" data-form="map">
+    <div class="tp-grid" style="grid-template-columns:1fr 1fr;gap:12px">
+    <div><label class="tp-label" for="m-c">Corredor</label><select id="m-c" class="tp-select" data-bind="map.c">${rows.map(r=>`<option ${m.c===r?'selected':''}>${r}</option>`).join('')}</select></div>
+    <div><label class="tp-label" for="m-s">Prateleira</label><select id="m-s" class="tp-select" data-bind="map.s">${['01','02','03','04','05','06','07','08'].map(r=>`<option ${m.s===r?'selected':''}>${r}</option>`).join('')}</select></div>
+    <div><label class="tp-label" for="m-n">Nível</label><select id="m-n" class="tp-select" data-bind="map.n">${['1','2','3','4'].map(r=>`<option ${m.n===r?'selected':''}>${r}</option>`).join('')}</select></div>
+    <div><label class="tp-label" for="m-b">Caixa</label><select id="m-b" class="tp-select" data-bind="map.b">${['01','02','03','04','05','06'].map(r=>`<option ${m.b===r?'selected':''}>${r}</option>`).join('')}</select></div></div>
+    <div><label class="tp-label" for="m-p">Peça guardada</label><select id="m-p" class="tp-select">${CATALOG.map(c=>`<option ${c[0]==='Farol LED esquerdo'?'selected':''}>${c[0]}</option>`).join('')}</select></div>
+    <div class="tp-stat"><span>Endereço gerado</span><b style="font-size:18px">Corredor ${m.c} · Prateleira ${m.s} · Nível ${m.n} · Caixa ${m.b}</b></div>
+    <button class="tp-btn tp-btn--primary" type="submit">${ic('check')}Salvar endereço</button></form>`))}
+  ${span(8, card('Planta do galpão', `<div class="tp-map">
+    <div class="tp-row tp-cap" style="font-weight:700;gap:8px">${ic('route')}Entrada · Doca 1 ${rows.map((r,i)=>`<span class="tp-seq">${i+1}</span>${r}`).join(' → ')} → Doca de expedição</div>
+    ${rows.map((r,i)=>`<div class="tp-aisle"><div class="tp-row" style="gap:8px;flex-wrap:nowrap"><span class="tp-seq">${i+1}</span><b>Corredor ${r}</b></div>${Array.from({length:8},(_,j)=>{const id=r+(j+1), sel=(m.c===r&&+m.s===j+1);return `<div class="tp-slot ${hits.includes(id)?'hit':used.includes(id)?'used':''}" ${sel?'style="outline:3px solid var(--accent);outline-offset:1px"':''}>P${String(j+1).padStart(2,'0')}</div>`;}).join('')}</div>`).join('')}
+    <div class="tp-row" style="justify-content:space-between">${legend([['var(--primary)','Rota do KT-0142'],['var(--data-light)','Ocupada'],['var(--surface-muted)','Livre'],['var(--accent)','Endereço selecionado']])}<span class="tp-cap">5 corredores · 8 prateleiras · 4 níveis</span></div></div>`))}
+  </div>`;
+}
+function traceResult(q){
+  q=q.trim().toUpperCase();
+  if(q==='PC-000098') return {title:'PC-000098 · Pinça de freio dianteira', sub:'BLOCANTE · Kit KT-0142 · '+PROTOS.suv.name, b:true, steps:[
+    ['factory','22/09 08:14','Saiu da MetalSul Autopeças','Carga MN-0451 · Carla Mendes'],['package-check','22/09 14:02','Recebida na doca','Marcos Souza · Estoque'],['map-pin','22/09 14:20','Guardada','Corredor A · Prateleira 02 · Caixa 04'],['boxes','24/09 10:37','Inserida no kit KT-0142','Marcos Souza · Coleta'],['car','Destino','Protótipo SUV X – Teste de Pista','Juliana Costa · Testes']]};
+  const m=q.match(/^PC-0002(0[1-9]|10)$/);
+  if(m){ const n=+m[1], read=loadOk().includes(q), st=S.mn0457; const steps=[['factory','24/09 09:30','Fabricada no lote LT-2026-088',`OP-3310 · Peça ${String(n).padStart(2,'0')}/10`],['tag','25/09 14:05','Etiqueta impressa','Bruno Lima · Fornecedor']];
+    if(read) steps.push(['scan-barcode','25/09 16:3'+(n%10),'Bipada no carregamento da MN-0457','Bruno Lima']); else steps.push(['circle-x','25/09','Não bipada no carregamento','Divergência na MN-0457']);
+    if(read&&(st==='Em Trânsito'||st==='Recebido')) steps.push(['truck','25/09 17:02','Expedição autorizada','Carla Mendes']);
+    if(read&&st==='Recebido') steps.push(['map-pin','25/09 17:48','Recebida e guardada','Corredor D · Prateleira 05 · Nível 2 · Caixa 03']);
+    return {title:q+' · Farol LED esquerdo', sub:'NÃO-BLOCANTE · Reposição do KT-0142', b:false, steps}; }
+  if(q==='LT-2026-088') return {lot:true};
+  return null;
+}
+function E_ADM4(){
+  const t=S.trace, r=traceResult(t.q);
+  let res;
+  if(!r) res=`<div class="tp-empty"><div class="ring">${ic('package-search')}</div><b>Nenhum resultado para “${esc(t.q)}”</b><span>Tente PC-000098, PC-000205 ou o lote LT-2026-088.</span></div>`;
+  else if(r.lot) res=`<div class="tp-h3" style="margin-bottom:12px">Lote LT-2026-088 · 10 peças · fabricado em 24/09/2026</div><div class="tp-table-wrap"><table class="tp-table"><thead><tr>${sortTh('Etiqueta')}${sortTh('Peça')}${sortTh('Numeração')}${sortTh('Situação')}</tr></thead><tbody>${Array.from({length:10},(_,i)=>{const c='PC-0002'+String(i+1).padStart(2,'0');const ok=loadOk().includes(c);return `<tr class="is-clickable" data-a="trace" data-v="${c}"><td><b class="num">${c}</b></td><td>Farol LED esquerdo</td><td>Peça ${String(i+1).padStart(2,'0')}/10</td><td>${ok?st(S.mn0457==='Recebido'?'Recebido':'Carregada'):st('Faltou no carregamento')}</td></tr>`;}).join('')}</tbody></table></div>`;
+  else res=`<div class="tp-row" style="justify-content:space-between;margin-bottom:20px"><div><div class="tp-h2">${r.title}</div><div class="tp-row" style="gap:8px;margin-top:4px">${tagB(r.b)}<span class="tp-cap">${r.sub.split(' · ').slice(1).join(' · ')}</span></div></div>${qr(t.q,72)}</div>
+    <ol class="tp-timeline">${r.steps.map((s,i)=>`<li class="${i===r.steps.length-1?'last':''}"><span class="dot">${ic(s[0])}</span><div><div class="when">${s[1]}</div><div class="tp-h3">${s[2]}</div><div class="tp-muted">${s[3]}</div></div></li>`).join('')}</ol>`;
+  return `<div class="tp-grid">
+  ${span(12, card('Rastreabilidade', `<form class="tp-row" data-form="trace" style="gap:12px">
+    <div class="tp-seg" role="group" aria-label="Buscar por">${['Código','QR Code','Lote'].map(x=>`<button type="button" class="${t.mode===x?'on':''}" data-a="traceMode" data-v="${x}">${ic(x==='Código'?'tag':x==='QR Code'?'qr-code':'layers')}${x}</button>`).join('')}</div>
+    <div class="tp-search" style="flex:1;min-width:240px"><input id="trace-q" value="${esc(t.q)}" placeholder="${t.mode==='Lote'?'Ex.: LT-2026-088':'Ex.: PC-000098'}" aria-label="Código para rastrear"><button type="submit" aria-label="Buscar">${ic('search')}</button></div>
+    ${t.mode==='QR Code'?`<button type="button" class="tp-btn tp-btn--secondary" data-a="trace" data-v="PC-000098">${ic('scan-line')}Simular leitura de QR</button>`:''}</form>`))}
+  ${span(12, `<section class="tp-card">${res}</section>`)}
+  </div>`;
+}
+
+/* ===== TESTES ADM ===== */
+function T_ADM1(){
+  const k142=S.kits['KT-0142'];
+  const pc=[['hatch','circle-check','ok','Pronto para Teste','KT-0138 entregue completo em 24/09'],['suv','timer','data','Em Montagem',`KT-0142 · ${k142}`],['pickup','lock','danger','Parado por Peça Blocante','KT-0139 · falta Pinça de freio traseira']];
+  const kits=['KT-0142','KT-0139','KT-0145',...S.extraKits.map(x=>x.id)];
+  return `<div class="tp-grid">
+  ${pc.map(([id,icn,v,sts,sub])=>span(4, `<section class="tp-card" style="display:flex;gap:16px;align-items:flex-start;${v==='danger'?'box-shadow:inset 0 0 0 1.5px var(--danger)':''}"><div class="tp-iconbox ${v==='data'?'tp-iconbox--data':v==='danger'?'tp-iconbox--danger':''}">${ic(icn)}</div><div style="min-width:0"><div class="tp-cap" style="font-weight:700">${PROTOS[id].name}</div><div class="tp-h2 tp-status--${v==='ok'?'ok':v==='danger'?'bad':'info'}" style="margin:2px 0 4px">${sts}</div><div class="tp-cap">${sub}</div></div></section>`)).join('')}
+  ${span(4, card('SLA de entrega de kits', gauge(86,{split:.8,label:'Kits entregues no prazo pelo Estoque · Setembro'})))}
+  ${span(8, card('Taxa de falha e avaria de peças nos ensaios', lineChart({w:720,h:240,labels:['Abr','Mai','Jun','Jul','Ago','Set'],max:5,ticks:[0,1,2,3,4,5],fmt:v=>v+'%',series:[{vals:[3.2,2.8,4.1,3.5,2.6,2.9],color:'var(--data)',fill:true,dots:true}],marks:[{i:2,s:0,label:'4,1% · pico',color:'var(--accent)'}]}), `<span class="tp-cap">% de peças reprovadas por ensaio</span>`))}
+  ${span(12, card('Kits em andamento', `<div class="tp-table-wrap"><table class="tp-table"><thead><tr>${sortTh('Kit')}${sortTh('Protótipo')}${sortTh('Prioridade')}${sortTh('Status')}</tr></thead><tbody>${kits.map(k=>`<tr class="is-clickable" data-a="openKit" data-v="${k}"><td><b>${k}</b></td><td>${kitProto(k)}</td><td>${prioTag(kitPrio(k))}</td><td>${st(kitStatus(k))}</td></tr>`).join('')}</tbody></table></div>`, `<button class="tp-btn tp-btn--sm tp-btn--outline" data-a="go" data-v="T-ADM3">Ver acompanhamento</button>`))}
+  </div>`;
+}
+function catalogResults(){
+  const q=S.req.q.trim().toLowerCase(), list=CATALOG.filter(c=>!q||c[0].toLowerCase().includes(q)||c[1].toLowerCase().includes(q));
+  if(!list.length) return `<div class="tp-empty"><div class="ring">${ic('search')}</div><b>Nenhuma peça encontrada</b><span>Busque pelo nome ou pelo código (PN).</span></div>`;
+  return list.map(c=>{const inKit=S.req.items.some(x=>x[0]===c[0]);return `<div class="tp-result"><div class="tp-iconbox tp-iconbox--data" style="width:40px;height:40px">${ic('package')}</div><div class="t"><b>${c[0]}</b><span>${c[1]} · padrão ${c[2]?'BLOCANTE':'NÃO-BLOCANTE'}</span></div><button class="tp-btn tp-btn--sm ${inKit?'tp-btn--secondary':'tp-btn--outline'}" data-a="addItem" data-v="${c[0]}" ${inKit?'disabled':''}>${ic(inKit?'check':'plus')}${inKit?'No kit':'Adicionar ao kit'}</button></div>`;}).join('');
+}
+function T_ADM2(){
+  const r=S.req, last=S.extraKits.at(-1);
+  return `<div class="tp-grid">
+  ${last&&S.justSent?span(12, `<div class="tp-banner tp-banner--ok">${ic('circle-check')}<div><b>${last.id} enviado ao Estoque</b><p>Ricardo Alves já vê o pedido na fila. <button class="tp-link" data-a="openKit" data-v="${last.id}">Acompanhar ${last.id}</button></p></div></div>`):''}
+  ${span(7, card('Catálogo de peças', `<div class="tp-stack" style="gap:14px">
+    <div><label class="tp-label" for="rq-proto">Protótipo</label><select id="rq-proto" class="tp-select" data-bind="req.proto">${Object.entries(PROTOS).map(([k,p])=>`<option value="${k}" ${r.proto===k?'selected':''}>${p.name}</option>`).join('')}</select></div>
+    <div class="tp-search"><input id="rq-q" data-live="catalog" value="${esc(r.q)}" placeholder="Buscar peça por nome ou PN" aria-label="Buscar no catálogo"><button type="button" aria-label="Buscar">${ic('search')}</button></div>
+    <div class="tp-stack" style="gap:8px" id="catalog-results">${catalogResults()}</div></div>`))}
+  ${span(5, card('Kit solicitado', `<div class="tp-stack" style="gap:14px">
+    ${r.items.length?`<div class="tp-stack" style="gap:8px">${r.items.map((it,i)=>`<div class="tp-result"><div class="t"><b>${it[0]}</b><span class="tp-row" style="gap:6px;margin-top:4px">Qtd <button class="tp-icon-btn" style="width:26px;height:26px" data-a="qty" data-v="${i}|-1" aria-label="Diminuir">${ic('minus')}</button><b class="num">${it[1]}</b><button class="tp-icon-btn" style="width:26px;height:26px" data-a="qty" data-v="${i}|1" aria-label="Aumentar">${ic('plus')}</button></span></div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px"><label class="tp-switch"><input type="checkbox" data-a="toggleB" data-v="${i}" ${it[2]?'checked':''}><span class="track"></span><span style="color:${it[2]?'var(--danger)':'var(--text-secondary)'}">${it[2]?'BLOCANTE':'NÃO-BLOCANTE'}</span></label><button class="tp-link" style="font-size:12px" data-a="rmItem" data-v="${i}">Remover</button></div></div>`).join('')}</div>`
+      :`<div class="tp-empty"><div class="ring">${ic('boxes')}</div><b>Nenhuma peça no kit</b><span>Adicione peças pelo catálogo ao lado.</span></div>`}
+    <label class="tp-check"><input type="checkbox" data-a="partial" ${r.partial?'checked':''}><span>Autorizar envio de Kit Parcial se faltarem apenas peças não-blocantes</span></label>
+    <div><div class="tp-label">Prioridade</div><div class="tp-seg tp-seg--prio">${['Baixa','Média','Alta'].map(p=>`<button type="button" data-a="reqPrio" data-v="${p}" class="${r.prio===p?'on':''}">${p==='Alta'?'Alta/Urgente':p}</button>`).join('')}</div></div>
+    <button class="tp-btn tp-btn--primary tp-btn--block" data-a="sendReq" ${r.items.length?'':'disabled'}>${ic('send')}Enviar Solicitação ao Estoque</button></div>`, `<span class="tp-cap">${r.items.length} itens</span>`))}
+  </div>`;
+}
+const COLS=['Aguardando Separação','Em Separação','Em Trânsito','Entregue Parcial','Entregue Completo'];
+function T_ADM3(){
+  const kits=allKits();
+  const board = S.kview==='kanban' ? `<div class="tp-kanban">${COLS.map(c=>{const ks=kits.filter(k=>S.kits[k]===c);return `<div class="tp-kcol"><div class="tp-kcol__head"><span>${c}</span><span class="tp-tag tp-tag--info">${ks.length}</span></div>
+     ${ks.map(k=>{const items=kitItems(k);return `<button class="tp-kcard ${S.ksel===k&&S.drawer?'on':''}" data-a="openKit" data-v="${k}"><div class="tp-row" style="justify-content:space-between;width:100%"><b>${k}</b>${prioTag(kitPrio(k))}</div><span class="tp-cap">${kitProto(k)}</span><div class="tp-row" style="gap:6px">${k==='KT-0139'?`<span class="tp-tag tp-tag--blocante">${ic('lock')}TRAVADO</span>`:''}${items.some(x=>x[3]==='miss')&&k!=='KT-0139'?`<span class="tp-tag tp-tag--warn">PARCIAL</span>`:''}${items.some(x=>x[2])?`<span class="tp-tag tp-tag--nao">${items.length} itens · c/ blocante</span>`:''}</div></button>`;}).join('') || `<div class="tp-cap" style="text-align:center;padding:16px 0">Nenhum kit</div>`}</div>`;}).join('')}</div>`
+   : `<div class="tp-table-wrap"><table class="tp-table"><thead><tr>${sortTh('Kit')}${sortTh('Protótipo')}${sortTh('Prioridade')}${sortTh('Etapa')}</tr></thead><tbody>${kits.map(k=>`<tr class="is-clickable" data-a="openKit" data-v="${k}"><td><b>${k}</b></td><td>${kitProto(k)}</td><td>${prioTag(kitPrio(k))}</td><td>${st(kitStatus(k))}</td></tr>`).join('')}</tbody></table></div>`;
+  return card('Acompanhamento de kits', board, `<div class="tp-seg">${[['kanban','square-kanban','Kanban'],['table','table','Tabela']].map(([v,i,t])=>`<button data-a="kview" data-v="${v}" class="${S.kview===v?'on':''}">${ic(i)}${t}</button>`).join('')}</div>`);
+}
+function kitDrawer(){
+  const k=S.ksel, items=kitItems(k), sts=kitStatus(k), delivered=/Entregue/.test(S.kits[k]);
+  const miss=items.filter(x=>x[3]==='miss');
+  return `<aside class="tp-drawer" aria-label="Detalhes do ${k}"><div class="tp-drawer__head"><div style="flex:1"><div class="tp-h2">${k}</div><div class="tp-cap">${kitProto(k)}</div><div class="tp-row" style="gap:8px;margin-top:8px">${prioTag(kitPrio(k))}${st(sts)}</div></div><button class="tp-icon-btn" data-a="closeDrawer" aria-label="Fechar">${ic('x')}</button></div>
+  <div class="tp-drawer__body">
+   ${k==='KT-0142'?`<div class="tp-banner tp-banner--warn">${ic('circle-alert')}<div><b>Peça pendente: Farol LED esquerdo</b><p>NÃO-BLOCANTE · envio parcial autorizado. Reposição na OP-3310 (MetalSul, ${S.ops['OP-3310']==='Pendente'?'aguardando liberação':'em produção'}).</p></div></div>`:''}
+   ${k==='KT-0139'?`<div class="tp-banner tp-banner--bad">${ic('lock')}<div><b>Coleta travada</b><p>Falta Pinça de freio traseira (BLOCANTE). O teste de frenagem não pode começar sem ela.</p></div></div>`:''}
+   <div class="tp-h3">Peças do kit</div>
+   ${items.map(it=>`<div class="tp-result" style="${it[3]==='miss'?'background:var(--'+(it[2]?'danger':'warning')+'-bg);border-color:transparent':''}"><div class="t"><b>${it[0]} <span class="num tp-muted">×${it[1]}</span></b><div style="margin-top:4px">${tagB(it[2])}</div></div>${it[3]==='miss'?`<span class="tp-status tp-status--${it[2]?'bad':'warn'}">Em falta</span>`:delivered?`<span class="tp-status tp-status--ok">${ic('check')}Entregue</span>`:`<span class="tp-status tp-status--muted">Separação</span>`}</div>`).join('')}
+   ${miss.length&&k==='KT-0142'?`<div class="tp-cap">Pedido em 24/09 às 10:40 · Solicitante: Juliana Costa</div>`:''}
+  </div></aside>`;
+}
+
+/* ===== Componentes mobile ===== */
+function scanner(last, idle='Aponte a câmera para o QR Code'){
+  const k = last ? (last.ok?'is-ok':'is-bad') : '';
+  const msg = last ? (last.ok ? `${ic('circle-check')}${last.c} · OK` : `${ic('circle-x')}${last.msg}`) : `${ic('scan-line')}${idle}`;
+  return `<div class="tp-scanner ${k}"><div class="tp-scanner__frame"><i></i><i></i><i></i><i></i><div class="tp-scanner__laser"></div></div>${last?`<div class="tp-scanner__qr">${qr(last.c,100)}</div><span class="tp-scanner__beep">${ic('volume-2')}${last.ok?'bipe':'bipe duplo'}</span>`:''}<div class="tp-scanner__msg">${msg}</div></div>`;
+}
+const readRow = r => `<div class="tp-read tp-read--${r.ok?'ok':'bad'}"><span class="ico">${ic(r.ok?'check':'x')}</span><div><div class="code">${r.c}</div>${r.ok?`<div class="tp-cap">${r.sub||'Leitura OK'}</div>`:`<div class="tp-cap" style="color:var(--danger);font-weight:700">${r.msg}</div>`}</div><span class="when">${r.t}</span></div>`;
+const mCard = (html, style='') => `<section class="tp-card" style="${style}">${html}</section>`;
+const lockedNote = (txt, act, lbl) => `<div class="tp-banner tp-banner--info">${ic('lock')}<div><b>${txt}</b><p><button class="tp-link" data-a="${act}">${lbl}</button></p></div></div>`;
+const clock = () => { const d=new Date(); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); };
+
+/* ===== FORNECEDOR FUNC (Bruno) ===== */
+function F_FUNC1(){
+  const rel = S.ops['OP-3310']!=='Pendente';
+  return `<div class="tp-h3">Aguardando etiquetagem</div>
+  ${rel ? mCard(`<div class="tp-row" style="justify-content:space-between"><b style="font-size:18px">OP-3310</b><span class="tp-tag tp-tag--accent">EM DESTAQUE</span></div>
+    <div style="font-size:20px;font-weight:800;margin:6px 0 2px">Farol LED esquerdo × 10</div><div class="tp-muted">Lote LT-2026-088 · reposição do KT-0142</div>
+    <div class="tp-row" style="margin:12px 0">${S.labels.printed?st('Etiquetas impressas'):st('Liberado')}<span class="tp-cap">Liberado por Carla Mendes</span></div>
+    <button class="tp-btn tp-btn--primary tp-btn--block" data-a="go" data-v="F-FUNC2">${ic('printer')}${S.labels.printed?'Ver etiquetas':'Registrar e imprimir etiquetas'}</button>`, 'box-shadow:inset 0 0 0 2px var(--accent)')
+   : mCard(`<div class="tp-locked"><div class="tp-row" style="justify-content:space-between"><b style="font-size:18px">OP-3310</b><span class="tp-tag tp-tag--nao">${ic('lock')}BLOQUEADO</span></div><div style="font-size:20px;font-weight:800;margin:6px 0 2px">Farol LED esquerdo × 10</div></div>
+     ${lockedNote('Aguardando liberação de Carla Mendes','simRelease','Simular liberação pelo painel web')}`)}
+  <div class="tp-h3">Outros lotes</div>
+  ${mCard(`<div class="tp-row" style="justify-content:space-between"><b>OP-3306</b>${st('Etiquetado')}</div><div class="tp-muted">Amortecedor traseiro × 6 · 24/09</div>`)}
+  ${mCard(`<div class="tp-row" style="justify-content:space-between"><b>OP-3308</b>${st('Pendente')}</div><div class="tp-muted">Pinça de freio traseira × 4 · aguardando liberação</div>`)}
+  <div class="tp-h3">Carregamento de hoje</div>
+  ${mCard(`<div class="tp-row" style="justify-content:space-between"><b>MN-0457</b>${st(S.mn0457)}</div><div class="tp-muted" style="margin-bottom:10px">${loadOk().length} de 10 peças bipadas</div><div class="tp-progress"><i style="width:${loadOk().length*10}%"></i></div>`,'cursor:pointer" data-a="go" data-v="F-FUNC3')}`;
+}
+function F_FUNC2(){
+  const rel = S.ops['OP-3310']!=='Pendente', n=S.labels.qty||10;
+  const labels = Array.from({length:n},(_,i)=>'PC-0002'+String(i+1).padStart(2,'0'));
+  return `${rel?'':lockedNote('O lote OP-3310 ainda não foi liberado','simRelease','Simular liberação pelo painel web')}
+  ${mCard(`<div class="tp-stack" style="gap:14px">
+    <div><label class="tp-label" for="lb-lote">Lote</label><select id="lb-lote" class="tp-select" style="height:48px"><option>OP-3310 · Farol LED esquerdo</option></select></div>
+    <div><div class="tp-label">Quantidade produzida</div><div class="tp-row" style="gap:10px;flex-wrap:nowrap"><button class="tp-btn tp-btn--secondary" style="width:52px;padding:0" data-a="labelQty" data-v="-1" aria-label="Diminuir">${ic('minus')}</button><div class="tp-input num" style="height:52px;display:grid;place-items:center;font-size:24px;font-weight:800">${n}</div><button class="tp-btn tp-btn--secondary" style="width:52px;padding:0" data-a="labelQty" data-v="1" aria-label="Aumentar">${ic('plus')}</button></div></div>
+    <div class="tp-grid" style="grid-template-columns:1fr 1fr;gap:10px"><div><label class="tp-label" for="lb-mp">Lote de matéria-prima</label><input id="lb-mp" class="tp-input" style="height:48px" value="LT-2026-088"></div><div><label class="tp-label" for="lb-dt">Data de fabricação</label><input id="lb-dt" class="tp-input num" style="height:48px" value="24/09/2026"></div></div></div>`)}
+  <div class="tp-row" style="justify-content:space-between"><div class="tp-h3">Prévia das etiquetas</div><span class="tp-cap">${n} etiquetas · 50×30 mm</span></div>
+  <div class="tp-stack" style="gap:8px">${labels.slice(0,3).map((c,i)=>`<div class="tp-label-card">${qr(c,64)}<div><b>${c}</b>Farol LED esquerdo<br>Peça ${String(i+1).padStart(2,'0')}/${String(n).padStart(2,'0')} · LT-2026-088<br>Fab. 24/09/2026 · MetalSul Autopeças</div></div>`).join('')}
+  <div class="tp-cap" style="text-align:center">+ ${n-3} etiquetas até ${labels.at(-1)} (Peça ${n}/${n})</div></div>
+  ${S.labels.printed?`<div class="tp-banner tp-banner--ok">${ic('circle-check')}<div><b>${n} etiquetas impressas</b><p>Cole cada etiqueta na peça antes do carregamento.</p></div></div>`:''}
+  <button class="tp-btn tp-btn--primary tp-btn--block" data-a="print" ${rel?'':'disabled'}>${ic('printer')}${S.labels.printed?'Imprimir novamente':'Imprimir Etiquetas'}</button>`;
+}
+const LOAD_SEQ=[{c:'PC-000207',ok:true},{c:'PC-000207',ok:false,msg:'Peça repetida'},{c:'PC-000208',ok:true}];
+function F_FUNC3(){
+  const ok=loadOk().length, more=S.load.seq<LOAD_SEQ.length, sent=S.mn0457!=='Em Conferência';
+  return `${mCard(`<label class="tp-label" for="ld-mn">Manifesto</label><select id="ld-mn" class="tp-select" style="height:48px"><option>MN-0457 · OP-3310 · Doca 2 da Montadora</option></select>`)}
+  ${sent?'':scanner(S.load.last)}
+  ${mCard(`<div class="tp-row" style="justify-content:space-between;align-items:flex-end"><div><div class="tp-cap" style="font-weight:700">BIPADAS</div><div class="tp-bigcount">${ok}<span style="font-size:28px;color:var(--text-secondary)">/10</span></div></div>${sent?st(S.mn0457):more?'':st('Faltam '+(10-ok))}</div><div class="tp-progress ${ok===10?'tp-progress--ok':''}" style="margin-top:8px"><i style="width:${ok*10}%"></i></div>`)}
+  ${sent?`<div class="tp-banner tp-banner--ok">${ic('circle-check')}<div><b>Conferência enviada</b><p>Carla Mendes ${S.mn0457==='Aguardando Aprovação'?'vai aprovar a expedição no painel web.':'autorizou a expedição.'}</p></div></div>`
+   : more?`<button class="tp-btn tp-btn--secondary tp-btn--block" data-a="loadScan">${ic('scan-line')}Simular leitura</button>`
+   : `<div class="tp-banner tp-banner--warn">${ic('triangle-alert')}<div><b>Sem mais peças no carrinho</b><p>PC-000209 e PC-000210 não foram encontradas.</p></div></div>`}
+  <div class="tp-h3">Histórico de leituras</div>
+  <div class="tp-reads">${[...S.load.reads].reverse().map(readRow).join('')}</div>
+  ${sent?'':`<button class="tp-btn tp-btn--primary tp-btn--block" data-a="loadSend">${ic('send')}Enviar para Aprovação do ADM</button>`}`;
+}
+
+/* ===== ESTOQUE FUNC (Marcos) ===== */
+function E_FUNC1(){
+  const t=S.tab.marcos, arrived=S.mn0457==='Em Trânsito', recvd=S.mn0457==='Recebido';
+  const ready=S.k142ready && S.kits['KT-0142']==='Em Separação';
+  const kitsSep=[]; if(S.kits['KT-0142']==='Em Separação'&&!S.k142ready) kitsSep.push('KT-0142'); kitsSep.push('KT-0139');
+  ['KT-0145',...S.extraKits.map(x=>x.id)].forEach(k=>{ if(S.kits[k]==='Em Separação') kitsSep.push(k); });
+  const counts={'Recebimentos':recvd?0:1,'Montagem de Kits':kitsSep.length,'Kits para Despacho':ready?1:0};
+  let body='';
+  if(t==='Recebimentos') body = recvd ? `<div class="tp-empty"><div class="ring">${ic('circle-check')}</div><b>Nenhum recebimento pendente</b><span>MN-0457 conferida e guardada.</span></div>`
+    : mCard(`<div class="tp-row" style="justify-content:space-between"><b style="font-size:18px">MN-0457</b>${arrived?st('Na doca 2'):st('A caminho')}</div><div style="font-weight:700;margin-top:4px">MetalSul Autopeças · Farol LED esquerdo × ${loadOk().length}</div><div class="tp-muted" style="margin-bottom:12px">${arrived?'Chegou às 17:30':'Aguardando expedição do fornecedor'}</div>
+      ${arrived?`<button class="tp-btn tp-btn--primary tp-btn--block" data-a="go" data-v="E-FUNC2">${ic('package-check')}Conferir recebimento</button>`:lockedNote('A carga ainda não saiu do fornecedor','simArrive','Simular chegada na doca')}`)
+      + mCard(`<div class="tp-row" style="justify-content:space-between"><b>MN-0455</b>${st('Em Trânsito')}</div><div class="tp-muted">Suporte do motor × 8 · previsão 26/09</div>`);
+  if(t==='Montagem de Kits') body = kitsSep.map(k=> k==='KT-0139'
+    ? mCard(`<div class="tp-row" style="justify-content:space-between"><b style="font-size:18px">KT-0139</b><span class="tp-tag tp-tag--blocante">${ic('lock')}TRAVADO</span></div><div class="tp-muted">${PROTOS.pickup.name}</div><div class="tp-row" style="gap:6px;margin:8px 0 12px"><span style="font-weight:700">Falta Pinça de freio traseira</span>${tagB(true)}</div><button class="tp-btn tp-btn--outline tp-btn--block" data-a="showLock">Ver situação da coleta</button>`)
+    : mCard(`<div class="tp-row" style="justify-content:space-between"><b style="font-size:18px">${k}</b>${prioTag(kitPrio(k))}</div><div class="tp-muted">${kitProto(k)}</div><div class="tp-row" style="gap:6px;margin:8px 0 12px"><span class="tp-tag tp-tag--blocante">${ic('lock')}Contém BLOCANTE</span>${k==='KT-0142'?'<span class="tp-tag tp-tag--warn">PARCIAL AUTORIZADO</span>':''}<span class="tp-cap">${kitItems(k).length} itens</span></div>
+       ${k==='KT-0142'?`<button class="tp-btn tp-btn--primary tp-btn--block" data-a="go" data-v="E-FUNC3">${ic('route')}${S.route.idx?'Continuar coleta':'Iniciar coleta'}</button>`:`<button class="tp-btn tp-btn--outline tp-btn--block" data-a="toast" data-v="warn|Termine o KT-0142 antes: ele tem prioridade Alta.">${ic('route')}Iniciar coleta</button>`}`)).join('')
+    || `<div class="tp-empty"><div class="ring">${ic('boxes')}</div><b>Nenhum kit para montar</b></div>`;
+  if(t==='Kits para Despacho') body = ready ? mCard(`<div class="tp-row" style="justify-content:space-between"><b style="font-size:18px">KT-0142</b><span class="tp-tag tp-tag--warn">PARCIAL</span></div><div class="tp-muted" style="margin-bottom:12px">${PROTOS.suv.name} · 5 de 6 itens</div><button class="tp-btn tp-btn--primary tp-btn--block" data-a="go" data-v="E-FUNC4">${ic('truck')}Expedir kit</button>`)
+    : `<div class="tp-empty"><div class="ring">${ic('truck')}</div><b>Nenhum kit pronto para despacho</b><span>Os kits aparecem aqui quando a coleta termina.</span></div>`;
+  return `<div class="tp-tabs">${Object.keys(counts).map(k=>`<button class="tp-tab ${t===k?'on':''}" data-a="tabM" data-v="${k}" style="font-size:14px">${k.replace(' de Kits','').replace('Kits para ','')}<span class="count">${counts[k]}</span></button>`).join('')}</div>${body}`;
+}
+const RECV_SEQ=[{c:'PC-000315',ok:false,msg:'Peça não pertence a esta carga'},{c:'PC-000204',ok:true},{c:'PC-000205',ok:true},{c:'PC-000206',ok:true},{c:'PC-000207',ok:true},{c:'PC-000208',ok:true}];
+const GUARD='Corredor D · Prateleira 05 · Nível 2 · Caixa 03';
+function E_FUNC2(){
+  const ok=S.recv.reads.filter(r=>r.ok).length, man=loadOk().length, done=S.mn0457==='Recebido', more=S.recv.seq<RECV_SEQ.length;
+  if(S.mn0457!=='Em Trânsito'&&!done) return lockedNote('A carga MN-0457 ainda não chegou na doca','simArrive','Simular chegada na doca');
+  return `<div class="tp-grid" style="grid-template-columns:1fr 1fr;gap:10px"><div class="tp-stat"><span>MANIFESTO</span><b style="font-size:32px;line-height:40px">${man}</b></div><div class="tp-stat ${ok===man?'tp-stat--ok':''}"><span>LIDO</span><b style="font-size:32px;line-height:40px">${ok}</b></div></div>
+  ${done?`<div class="tp-banner tp-banner--ok">${ic('circle-check')}<div><b>Recebimento concluído</b><p>${man} peças guardadas em ${GUARD}.</p></div></div>`:scanner(S.recv.last)}
+  ${!done&&S.recv.last&&S.recv.last.ok?`<div class="tp-step" style="background:var(--success)"><div class="tp-cap" style="color:#fff;font-weight:800">GUARDAR EM</div><div class="where">${GUARD.replace(/ · /g,' → ')}</div><div style="font-weight:600">${S.recv.last.c} · Farol LED esquerdo</div></div>`:''}
+  ${!done&&more?`<button class="tp-btn tp-btn--secondary tp-btn--block" data-a="recvScan">${ic('scan-line')}Simular leitura</button>`:''}
+  ${mCard(`<div class="tp-h3" style="margin-bottom:10px">Registrar avaria</div>${S.recv.photo?`<div class="tp-row"><div class="tp-thumb">${ic('image')}</div><div><b>Foto anexada</b><div class="tp-cap">IMG_0457_01.jpg</div></div></div>`:`<button class="tp-photo" style="width:100%" data-a="photo" data-v="recv">${ic('camera')}<span style="font-weight:700">Tirar foto da peça</span></button>`}
+     <textarea class="tp-input" rows="2" style="margin-top:10px" aria-label="Descrição da avaria" placeholder="Descreva o dano (opcional)"></textarea>
+     <button class="tp-btn tp-btn--outline tp-btn--block" style="margin-top:10px" data-a="damage" ${S.recv.damage?'disabled':''}>${ic('triangle-alert')}${S.recv.damage?'Avaria registrada':'Registrar avaria'}</button>`)}
+  <div class="tp-h3">Leituras</div><div class="tp-reads">${[...S.recv.reads].reverse().map(readRow).join('')}</div>
+  ${done?'':`<button class="tp-btn tp-btn--primary tp-btn--block" data-a="recvDone" ${ok>=man?'':'disabled'}>${ic('check')}Concluir recebimento</button>`}`;
+}
+function E_FUNC3(){
+  const idx=S.route.idx, total=KIT142.length, cur=KIT142[idx], done=idx>=total;
+  const step = done ? `<div class="tp-banner tp-banner--ok">${ic('circle-check')}<div><b>Coleta concluída · kit parcial</b><p>5 de 6 itens coletados. O KT-0142 está em Kits para Despacho.</p></div></div><button class="tp-btn tp-btn--primary tp-btn--block" data-a="go" data-v="E-FUNC4">${ic('truck')}Ir para expedição</button>`
+   : cur.missing ? `<div class="tp-step" style="background:var(--warning);color:#1E2F38"><div style="font-weight:800;font-size:13px">${idx+1}º ITEM · SEM ENDEREÇO</div><div class="where">${cur.p}</div><div class="tp-row" style="gap:8px">${tagB(false)}<b>EM FALTA no estoque</b></div></div><button class="tp-btn tp-btn--accent tp-btn--block" data-a="routeMiss">${ic('circle-alert')}Registrar falta</button>`
+   : `<div class="tp-step"><div style="font-weight:800;font-size:13px;opacity:.85">${idx+1}º PASSO · ${cur.p.toUpperCase()}</div><div class="where">Corredor ${cur.c} → Prateleira ${String(cur.s).padStart(2,'0')} → Pegue ${cur.q} ${cur.q>1?'unidades':'unidade'}</div><div style="opacity:.9">${cur.addr.split(' · ').slice(2).join(' · ')}</div></div>
+      ${scanner(S.route.last,'Leia o QR da caixa')}<button class="tp-btn tp-btn--secondary tp-btn--block" data-a="routeScan">${ic('scan-line')}Simular leitura do QR</button>`;
+  return `${mCard(`<div class="tp-row" style="justify-content:space-between"><b style="font-size:18px">KT-0142</b>${prioTag('Alta')}</div><div class="tp-muted">${PROTOS.suv.name}</div><div class="tp-row" style="justify-content:space-between;margin:10px 0 6px"><span class="tp-cap" style="font-weight:700">ROTA A → B → C → D</span><span class="tp-cap num" style="font-weight:700">${Math.min(idx,total)} de ${total}</span></div><div class="tp-progress"><i style="width:${Math.min(idx,total)/total*100}%"></i></div>`)}
+  ${step}
+  <div class="tp-h3">Itens do kit</div>
+  <div class="tp-stack" style="gap:8px">${KIT142.map((it,i)=>{const cls=i<idx?(it.missing?'is-miss':'is-done'):i===idx?'is-current':'';return `<div class="tp-item ${cls}"><span class="ico">${ic(i<idx?(it.missing?'triangle-alert':'check'):i===idx?'hand':'lock')}</span><div class="t ${i>idx?'tp-locked':''}"><b>${it.p} <span class="num" style="font-weight:600">×${it.q}</span></b><span>${it.missing?'Em falta · sem endereço':it.addr}</span><div style="margin-top:6px">${tagB(it.b)}</div></div></div>`;}).join('')}</div>
+  <button class="tp-btn tp-btn--ghost tp-btn--block" data-a="showLock">${ic('lock')}Ver exceção: KT-0139 com peça blocante em falta</button>`;
+}
+function E_FUNC4(){
+  if(S.kits['KT-0142']!=='Em Separação') return `<div class="tp-banner tp-banner--ok">${ic('truck')}<div><b>KT-0142 expedido</b><p>Levado por ${S.ship.carrier||'transporte interno'} até a oficina de protótipos.</p></div></div><div class="tp-empty"><div class="ring">${ic('inbox')}</div><b>Nenhum outro kit para despacho</b></div>`;
+  if(!S.k142ready) return `<div class="tp-empty"><div class="ring">${ic('truck')}</div><b>Nenhum kit pronto para despacho</b><span>Termine a coleta do KT-0142 para expedir.</span><button class="tp-btn tp-btn--primary" style="margin-top:8px" data-a="go" data-v="E-FUNC3">${ic('route')}Ir para a coleta</button></div>`;
+  const opts=[['Fernanda Rocha','Testes · retira no balcão'],['Transporte interno','Carrinho elétrico 03'],['Marcos Souza','Eu mesmo levo até a oficina']];
+  return `${mCard(`<div class="tp-row" style="justify-content:space-between"><b style="font-size:18px">KT-0142</b><span class="tp-tag tp-tag--warn">PARCIAL</span></div><div class="tp-muted">${PROTOS.suv.name} · 5 de 6 itens · Farol LED esquerdo pendente</div>`)}
+  <div class="tp-h3">1. Leia o QR da caixa do kit</div>
+  ${S.ship.scanned?`<div class="tp-read tp-read--ok"><span class="ico">${ic('check')}</span><div><div class="code">CX-KT-0142</div><div class="tp-cap">Caixa do kit confirmada</div></div><span class="when">${S.ship.t}</span></div>`:`${scanner(null,'Leia o QR da caixa do kit')}<button class="tp-btn tp-btn--secondary tp-btn--block" data-a="shipScan">${ic('scan-line')}Simular leitura</button>`}
+  <div class="tp-h3">2. Quem leva o kit até a oficina?</div>
+  <div class="tp-stack" style="gap:8px">${opts.map(o=>`<button class="tp-item" style="cursor:pointer;text-align:left;width:100%;${S.ship.carrier===o[0]?'border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-soft)':''}" data-a="carrier" data-v="${o[0]}"><span class="ico" style="${S.ship.carrier===o[0]?'background:var(--primary);color:var(--on-primary)':''}">${ic(S.ship.carrier===o[0]?'check':'user')}</span><div class="t"><b>${o[0]}</b><span>${o[1]}</span></div></button>`).join('')}</div>
+  <button class="tp-btn tp-btn--primary tp-btn--block" data-a="shipConfirm" ${S.ship.scanned&&S.ship.carrier?'':'disabled'}>${ic('truck')}Confirmar expedição</button>`;
+}
+
+/* ===== TESTES FUNC (Fernanda) ===== */
+function T_FUNC1(){
+  const s=S.kits['KT-0142'];
+  const banner = s==='Em Trânsito' ? `<button class="tp-banner tp-banner--ok" style="width:100%;text-align:left;cursor:pointer" data-a="go" data-v="T-FUNC2">${ic('bell')}<div><b>KT-0142 chegou</b><p>Levado por ${S.ship.carrier||'transporte interno'}. Toque para conferir.</p></div></button>`
+    : /Entregue/.test(s) ? `<div class="tp-banner tp-banner--ok">${ic('circle-check')}<div><b>KT-0142 aceito</b><p>SUV X liberado para montagem.</p></div></div>`
+    : `<div class="tp-banner tp-banner--info">${ic('timer')}<div><b>KT-0142 em separação no Estoque</b><p>Você recebe um aviso quando ele chegar. <button class="tp-link" data-a="simKitArrive">Simular chegada</button></p></div></div>`;
+  const label = k => ({'Em Separação':'Em separação','Aguardando Separação':'Aguardando separação','Em Trânsito':'A caminho · chegou','Entregue Parcial':'Aceito · parcial'}[S.kits[k]]||S.kits[k]);
+  return `${banner}<div class="tp-h3">Kits a caminho</div>
+  ${['KT-0142','KT-0145','KT-0139'].map(k=>mCard(`<div class="tp-row" style="justify-content:space-between"><b style="font-size:18px">${k}</b>${k==='KT-0139'?`<span class="tp-tag tp-tag--blocante">${ic('lock')}TRAVADO</span>`:prioTag(kitPrio(k))}</div>
+    <div style="font-weight:700;margin-top:2px">${ic('car')} ${kitProto(k)}</div><div class="tp-row" style="justify-content:space-between;margin-top:8px"><span class="tp-cap">${kitItems(k).length} itens${k==='KT-0142'?' · parcial autorizado':''}</span>${k==='KT-0139'?st('Travado'):st(label(k))}</div>`, k==='KT-0142'?'cursor:pointer" data-a="go" data-v="T-FUNC2':'')).join('')}`;
+}
+const ACC_SEQ=[{i:0,ok:true},{i:1,ok:true},{i:1,ok:false,msg:'Peça repetida'},{i:2,ok:true},{i:3,ok:true},{i:4,ok:true}];
+function T_FUNC2(){
+  const s=S.kits['KT-0142'], arrived=s==='Em Trânsito', accepted=/Entregue/.test(s), got=S.accept.got, allIn=got.length===5;
+  if(!arrived&&!accepted) return lockedNote('O KT-0142 ainda não chegou na oficina','simKitArrive','Simular chegada do kit');
+  return `${mCard(`<div class="tp-row" style="justify-content:space-between"><b style="font-size:18px">KT-0142</b>${accepted?st('Entregue Parcial'):st('Na oficina')}</div><div class="tp-muted">${PROTOS.suv.name}</div>`)}
+  ${accepted?`<div class="tp-banner tp-banner--ok">${ic('circle-check')}<div><b>Kit aceito e liberado para montagem</b><p>Juliana Costa vê o KT-0142 como Entregue Parcial.</p></div></div>`
+   : `${scanner(S.accept.last,'Leia o QR de cada peça')}${S.accept.seq<ACC_SEQ.length?`<button class="tp-btn tp-btn--secondary tp-btn--block" data-a="accScan">${ic('scan-line')}Simular leitura</button>`:''}`}
+  <div class="tp-h3">Pedido x Entregue</div>
+  <div class="tp-stack" style="gap:8px">${KIT142.map((it,i)=>{const has=got.includes(i)||(accepted&&!it.missing);return `<div class="tp-item ${it.missing?'is-miss':has?'is-done':''}"><span class="ico">${ic(it.missing?'triangle-alert':has?'check':'scan-line')}</span><div class="t"><b>${it.p}</b><span class="num">Pedido ${it.q} · Entregue ${it.missing?0:has?it.q:'—'}</span><div style="margin-top:6px">${tagB(it.b)}</div></div></div>`;}).join('')}</div>
+  <div class="tp-banner tp-banner--warn">${ic('triangle-alert')}<div><b>Farol LED esquerdo ausente</b><p>Peça NÃO-BLOCANTE. O envio parcial foi autorizado; o teste pode começar sem ela.</p></div></div>
+  ${S.accept.reported?`<div class="tp-banner tp-banner--info">${ic('info')}<div><b>Relato enviado ao Estoque</b><p>Ricardo Alves vai analisar a peça apontada.</p></div></div>`:''}
+  ${accepted?'':`<button class="tp-btn tp-btn--outline tp-btn--block" style="border-color:var(--danger);color:var(--danger)" data-a="report">${ic('camera')}Reportar Peça Danificada/Incompatível</button>
+  <button class="tp-btn tp-btn--success tp-btn--block" data-a="accept" ${allIn?'':'disabled'}>${ic('circle-check')}Dar Aceite e Liberar para Montagem</button>${allIn?'':`<div class="tp-cap" style="text-align:center">Leia as ${5-got.length} peças restantes para liberar o aceite</div>`}`}`;
+}
+
+/* ===== Telas por código ===== */
+const SCREENS = {'F-ADM1':F_ADM1,'F-ADM2':F_ADM2,'F-ADM3':F_ADM3,'E-ADM1':E_ADM1,'E-ADM2':E_ADM2,'E-ADM3':E_ADM3,'E-ADM4':E_ADM4,'T-ADM1':T_ADM1,'T-ADM2':T_ADM2,'T-ADM3':T_ADM3,
+  'F-FUNC1':F_FUNC1,'F-FUNC2':F_FUNC2,'F-FUNC3':F_FUNC3,'E-FUNC1':E_FUNC1,'E-FUNC2':E_FUNC2,'E-FUNC3':E_FUNC3,'E-FUNC4':E_FUNC4,'T-FUNC1':T_FUNC1,'T-FUNC2':T_FUNC2};
+const TITLES = {'F-FUNC1':'Lotes liberados','F-FUNC2':'Registro e etiquetas','F-FUNC3':'Carregamento','E-FUNC1':'Fila de tarefas','E-FUNC2':'Conferência de recebimento','E-FUNC3':'Coleta do KT-0142','E-FUNC4':'Expedição de kit','T-FUNC1':'Kits esperados','T-FUNC2':'Conferência do kit'};
+const HOME = {'F-FUNC2':'F-FUNC1','F-FUNC3':'F-FUNC1','E-FUNC2':'E-FUNC1','E-FUNC3':'E-FUNC1','E-FUNC4':'E-FUNC1','T-FUNC2':'T-FUNC1'};
+const SEARCH = [
+  ['OP-3310','Ordem · Farol LED esquerdo ×10','carla','F-ADM2'],['OP-3308','Ordem · Pinça de freio traseira ×4','carla','F-ADM2'],['MN-0457','Carga · conferência de 10 peças','carla','F-ADM3'],['MN-0451','Remessa com problema','carla','F-ADM1'],
+  ['KT-0142','Kit · SUV X – Teste de Pista','ricardo','E-ADM2'],['KT-0139','Kit travado · Pickup Pro','ricardo','E-ADM2'],['KT-0145','Kit · Hatch E-Tech','ricardo','E-ADM2'],['PC-000098','Pinça de freio dianteira · rastrear','ricardo','E-ADM4'],['LT-2026-088','Lote de matéria-prima · rastrear','ricardo','E-ADM4'],
+  ['KT-0142','Kit · SUV X – Teste de Pista','juliana','T-ADM3'],['KT-0139','Kit travado · Pickup Pro','juliana','T-ADM3'],['KT-0145','Kit · Hatch E-Tech','juliana','T-ADM3']
+];
+
+/* ===== Seletores de perfil ===== */
+function profCard(p, big){
+  return `<button class="tp-card" data-a="pick" data-v="${p.id}" style="display:flex;${big?'flex-direction:column;align-items:center;text-align:center;padding:28px 24px;gap:10px':'align-items:center;gap:14px;padding:18px;text-align:left'};border:1.5px solid transparent;cursor:pointer;width:100%">
+    <span class="tp-avatar" style="${big?'width:84px;height:84px;font-size:28px':'width:60px;height:60px;font-size:20px'}">${p.ini}</span>
+    <span style="flex:1;min-width:0"><b style="display:block;font-size:${big?20:18}px;line-height:26px">${p.name}</b><span class="tp-muted" style="display:block">${p.role}</span></span>
+    <span class="tp-tag tp-tag--info" style="height:28px;font-size:12px;padding:0 12px">${ic(p.icon)}${p.mod.toUpperCase()}</span>
+    ${big?`<span class="tp-cap">${p.org}</span><span class="tp-btn tp-btn--primary" style="margin-top:8px">Entrar como ${p.first}</span>`:''}</button>`;
+}
+function webPicker(){
+  return `<div style="height:100%;background:var(--content-bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:36px;padding:40px;position:relative">
+   <div style="text-align:center"><div class="tp-row" style="justify-content:center;gap:10px;margin-bottom:10px"><span class="tp-iconbox tp-iconbox--data" style="background:var(--primary);color:var(--on-primary)">${ic('route')}</span><span style="font-size:32px;font-weight:800;color:var(--primary)">TracePro</span></div>
+   <h1 class="tp-h1">Escolha um perfil para entrar</h1><p class="tp-muted" style="margin:6px 0 0">Painel web dos administradores · Fornecedor → Estoque → Testes</p></div>
+   <div style="display:grid;grid-template-columns:repeat(3,320px);gap:24px">${['carla','ricardo','juliana'].map(k=>profCard(PROFILES[k],true)).join('')}</div>
+   <p class="tp-cap">Protótipo de demonstração · dados fictícios · nada é salvo ao recarregar</p></div>`;
+}
+function mobPicker(){
+  return `<div class="tp-m-status"><span>${clock()}</span><span>${ic('zap')}</span></div>
+  <div class="tp-m-head" style="padding-bottom:26px"><div class="tp-row" style="gap:10px;margin-top:10px"><span class="tp-iconbox" style="background:#ffffff26;color:#fff;border:0">${ic('route')}</span><b style="font-size:24px">TracePro</b></div><div class="tp-m-title"><h2>Quem vai trabalhar agora?</h2></div><div style="opacity:.85;font-size:14px">Toque no seu perfil para entrar</div></div>
+  <div class="tp-m-body">${['bruno','marcos','fernanda'].map(k=>profCard(PROFILES[k],false)).join('')}<p class="tp-cap" style="text-align:center">Protótipo · dados fictícios</p></div>`;
+}
+
+/* ===== Cascas ===== */
+function notesPop(pid){
+  return `<div class="tp-pop" role="dialog" aria-label="Notificações"><h4>Notificações</h4>${NOTES[pid].map(n=>`<div class="tp-note"><span class="ico" style="background:var(--${n[1]==='data'?'primary-soft':n[1]+'-bg'});color:var(--${n[1]==='data'?'primary':n[1]==='warning'?'warning-text':n[1]})">${ic(n[0])}</span><div><p>${n[2]}</p><small>${n[3]}</small></div></div>`).join('')}</div>`;
+}
+function searchPop(pid){
+  const q=(S.hsq||'').trim().toLowerCase(), res=SEARCH.filter(x=>x[2]===pid&&(!q||x[0].toLowerCase().includes(q)||x[1].toLowerCase().includes(q)));
+  return `<div class="tp-pop" style="right:260px" role="dialog" aria-label="Resultados da busca"><h4>Resultados para “${esc(S.hsq||'')}”</h4>${res.length?res.map(r=>`<button class="tp-note" style="width:100%;border:0;background:none;cursor:pointer;text-align:left" data-a="hsGo" data-v="${r[0]}|${r[3]}"><span class="ico" style="background:var(--primary-soft);color:var(--primary)">${ic('search')}</span><div><p><b>${r[0]}</b></p><small>${r[1]}</small></div></button>`).join(''):`<div class="tp-empty" style="padding:16px"><b>Nada encontrado no seu módulo</b><span>Tente KT-0142, MN-0457 ou PC-000098.</span></div>`}</div>`;
+}
+const toastsHtml = () => `<div class="tp-toasts" aria-live="polite">${S.toasts.filter(t=>t.dev===S.device).map(t=>`<div class="tp-toast tp-toast--${t.k}"><span class="ico">${ic(t.k==='ok'?'check':t.k==='bad'?'x':'triangle-alert')}</span>${t.m}</div>`).join('')}</div>`;
+function webShell(p, scr){
+  const menu = MENUS[p.id];
+  return `<div class="tp-app"><aside class="tp-side">
+    <div class="tp-side__who"><span class="tp-avatar tp-avatar--lg">${p.ini}</span><span class="name">${p.name}</span><span class="role">${p.role} · ${p.org}</span><span class="mod">${ic(p.icon)}${p.mod}</span></div>
+    <nav class="tp-nav" aria-label="Menu">${menu.map(([c,t,i])=>`<button class="${c===scr?'on':''}" data-a="go" data-v="${c}" ${c===scr?'aria-current="page"':''}>${ic(i)}${t}</button>`).join('')}</nav>
+    <button class="tp-side__swap" data-a="swap">${ic('arrow-left-right')}Trocar perfil</button></aside>
+   <div class="tp-main"><header class="tp-head"><h1 class="tp-h1">Olá, ${p.first}!</h1>
+     <form class="tp-search" data-form="hsearch" role="search"><input id="hs-q" placeholder="Buscar kit, carga, peça…" value="${esc(S.hsq||'')}" aria-label="Buscar"><button type="submit" aria-label="Buscar">${ic('search')}</button></form>
+     <button class="tp-theme" data-a="theme" aria-label="Alternar tema"><span class="${S.theme.web==='light'?'on':''}">${ic('sun')}</span><span class="${S.theme.web==='dark'?'on':''}">${ic('moon')}</span></button>
+     <button class="tp-icon-btn tp-bell" data-a="bell" aria-label="Notificações">${ic('bell')}<span class="dot">${NOTES[p.id].length}</span></button></header>
+     <main class="tp-content">${SCREENS[scr]()}</main></div>
+   ${S.pop==='bell'?notesPop(p.id):S.pop==='search'?searchPop(p.id):''}
+   ${S.drawer&&scr==='T-ADM3'?kitDrawer():''}
+   ${modalHtml()}${toastsHtml()}</div>`;
+}
+function mobShell(p, scr){
+  const menu=MENUS[p.id], back=HOME[scr];
+  return `<div class="tp-m-status"><span>${clock()}</span><span class="tp-row" style="gap:6px">${ic('zap')}</span></div>
+  <header class="tp-m-head"><div class="tp-m-head__row"><span class="tp-avatar">${p.ini}</span><div class="who"><b>${p.name}</b><span>${p.role} · ${p.mod}</span></div>
+    <button class="tp-icon-btn" data-a="theme" aria-label="Alternar tema">${ic(S.theme.mob==='light'?'moon':'sun')}</button>
+    <button class="tp-icon-btn tp-bell" data-a="bell" aria-label="Notificações">${ic('bell')}<span class="dot">${NOTES[p.id].length}</span></button></div>
+    <div class="tp-m-title">${back?`<button class="tp-m-back" data-a="go" data-v="${back}" aria-label="Voltar">${ic('chevron-left')}</button>`:''}<h2>${TITLES[scr]}</h2></div>
+    ${back?'':`<button class="tp-m-swap" data-a="swap">${ic('arrow-left-right')}Trocar perfil</button>`}</header>
+  <main class="tp-m-body">${SCREENS[scr]()}</main>
+  ${p.id==='bruno'&&scr==='F-FUNC1'?`<button class="tp-fab" data-a="go" data-v="F-FUNC3" aria-label="Abrir leitor">${ic('scan-line')}</button>`:''}
+  <nav class="tp-m-nav" aria-label="Navegação">${menu.map(([c,t,i])=>`<button class="${c===scr?'on':''}" data-a="go" data-v="${c}">${ic(i)}${t}</button>`).join('')}</nav>
+  ${S.pop==='bell'?`<div style="position:absolute;inset:0;z-index:39" data-a="bell"></div>`+notesPop(p.id).replace('class="tp-pop"','class="tp-pop" style="top:110px;right:12px;left:12px;width:auto"'):''}
+  ${S.lock?lockScreen():''}${modalHtml()}${toastsHtml()}`;
+}
+function lockScreen(){
+  return `<div class="tp-lockscreen" role="alertdialog" aria-label="Coleta travada"><div class="big">${ic('lock')}</div><div style="font-size:28px;line-height:34px;font-weight:800">Coleta travada</div><div style="font-size:18px;font-weight:700">Estoque ADM notificado</div>
+  <div style="background:#ffffff1f;border-radius:12px;padding:14px 16px;text-align:left;width:100%"><b>KT-0139</b> · ${PROTOS.pickup.name}<br>Falta <b>Pinça de freio traseira</b> (BLOCANTE). Sem ela o teste não acontece.<br><span style="opacity:.85;font-size:14px">Ricardo Alves recebeu o alerta às 09:41. Reposição: OP-3308.</span></div>
+  <button class="tp-btn tp-btn--lg tp-btn--block" style="background:#fff;color:#C0392B" data-a="unlock">Voltar para a fila</button></div>`;
+}
+function modalHtml(){
+  const m=S.modal; if(!m) return '';
+  let body='';
+  if(m.type==='print'){
+    const done=m.p>=100;
+    body=`<div class="tp-modal__icon" style="background:var(--${done?'success':'primary'}-bg,var(--primary-soft));color:var(--${done?'success':'primary'})">${ic(done?'circle-check':'printer')}</div>
+    <div class="tp-h2">${done?'Etiquetas impressas':`Enviando ${S.labels.qty||10} etiquetas para a impressora térmica (Bluetooth)…`}</div>
+    <div class="tp-muted">${done?`PC-000201 a PC-0002${String(S.labels.qty||10).padStart(2,'0')} · Impressora ZT-01 da linha 3`:'Impressora ZT-01 da linha 3'}</div>
+    <div class="tp-progress ${done?'tp-progress--ok':''}"><i style="width:${m.p}%"></i></div><div class="tp-cap num">${Math.round(m.p/10)} de 10 enviadas</div>
+    ${done?`<div class="tp-modal__actions"><button class="tp-btn tp-btn--primary tp-btn--block" data-a="modalClose">Concluir</button></div>`:''}`;
+  }
+  if(m.type==='partial') body=`<div class="tp-modal__icon" style="background:var(--warning-bg);color:var(--warning-text)">${ic('circle-alert')}</div><div class="tp-h2">Despachar Kit Parcial?</div>
+    <div class="tp-banner tp-banner--warn">${ic('triangle-alert')}<div><b>Farol LED esquerdo em falta</b><p>Peça NÃO-BLOCANTE. Juliana Costa autorizou envio parcial no pedido.</p></div></div>
+    <div class="tp-muted">Os 5 itens coletados seguem agora. O farol vai depois, pela reposição OP-3310.</div>
+    <div class="tp-modal__actions" style="flex-direction:column"><button class="tp-btn tp-btn--primary tp-btn--block" data-a="partialYes">${ic('truck')}Despachar parcial</button><button class="tp-btn tp-btn--ghost tp-btn--block" data-a="partialNo">Aguardar a peça</button></div>`;
+  if(m.type==='report') body=`<div class="tp-row" style="justify-content:space-between"><div class="tp-h2">Reportar peça</div><button class="tp-icon-btn" data-a="modalClose" aria-label="Fechar">${ic('x')}</button></div>
+    <div><label class="tp-label" for="rp-p">Peça</label><select id="rp-p" class="tp-select" style="height:48px">${KIT142.filter(i=>!i.missing).map(i=>`<option>${i.p}</option>`).join('')}</select></div>
+    <div class="tp-seg" style="align-self:flex-start"><button class="on">Danificada</button><button>Incompatível</button></div>
+    ${m.photo?`<div class="tp-row"><div class="tp-thumb">${ic('image')}</div><div><b>Foto anexada</b><div class="tp-cap">IMG_KT0142_01.jpg</div></div></div>`:`<button class="tp-photo" data-a="photo" data-v="report">${ic('camera')}<span style="font-weight:700">Tirar foto</span></button>`}
+    <div><label class="tp-label" for="rp-c">Comentário</label><textarea id="rp-c" class="tp-input" rows="3" placeholder="Ex.: rosca do suporte espanada"></textarea></div>
+    <button class="tp-btn tp-btn--danger tp-btn--block" data-a="reportSend">${ic('send')}Enviar relato ao Estoque</button>`;
+  return `<div class="tp-backdrop"><div class="tp-modal" role="dialog" aria-modal="true">${body}</div></div>`;
+}
+
+/* ===== Casca de apresentação ===== */
+function presBar(){
+  const dev=S.device, p=PROFILES[S.prof[dev]], scr=S.scr[dev];
+  const where = p ? `${scr} · ${p.name} (${p.mod})` : (dev==='web'?'Seleção de perfil · Web':'Seleção de perfil · Mobile');
+  return `<header class="pres"><div class="pres__brand"><b>TracePro</b><span>Protótipo navegável · dados fictícios</span></div>
+   <div class="pres__seg" role="tablist">${[['web','Web · Administradores'],['mob','Mobile · Funcionários']].map(([v,t])=>`<button role="tab" aria-selected="${dev===v}" class="${dev===v?'on':''}" data-a="device" data-v="${v}">${t}</button>`).join('')}</div>
+   <div class="pres__act"><button data-a="skipEnd">Pular para o fim da história</button><button data-a="reset">Reiniciar demo</button></div></header>
+   <div class="pres__where"><span>${where}</span></div>`;
+}
+
+/* ===== Render ===== */
+const root = document.getElementById('app');
+function render(){
+  const keep={}; root.querySelectorAll('.tp-content,.tp-m-body,.tp-drawer__body').forEach(el=>keep[el.className]=el.scrollTop);
+  const keyNow = S.device+(S.scr[S.device]||'')+(S.prof[S.device]||'');
+  const dev=S.device, pid=S.prof[dev], p=PROFILES[pid];
+  let inner;
+  if(dev==='web') inner = `<div class="frame frame--web"><div class="tp" data-theme="${S.theme.web}" style="width:1440px;height:900px;position:relative">${p?webShell(p,S.scr.web):webPicker()+toastsHtml()}</div></div>`;
+  else inner = `<div class="frame frame--mob"><div class="tp tp-phone" data-theme="${S.theme.mob}">${p?mobShell(p,S.scr.mob):mobPicker()+toastsHtml()}</div></div>`;
+  root.innerHTML = presBar() + `<div class="stage">${inner}</div>`;
+  if(render.key===keyNow) root.querySelectorAll('.tp-content,.tp-m-body,.tp-drawer__body').forEach(el=>{ if(keep[el.className]!=null) el.scrollTop=keep[el.className]; });
+  render.key=keyNow; fit();
+}
+function fit(){
+  const st=root.querySelector('.stage'), f=root.querySelector('.frame'); if(!st||!f) return;
+  const t=f.firstElementChild, W=S.device==='web'?1440:410, H=S.device==='web'?900:864;
+  const s=Math.min(1,(st.clientWidth)/W);
+  t.style.transform=`scale(${s})`; t.style.transformOrigin='top left';
+  f.style.width=W*s+'px'; f.style.height=H*s+'px';
+  if(S.device==='mob'){ t.style.marginLeft='10px'; t.style.marginTop='10px'; }
+}
+window.addEventListener('resize', fit);
+
+/* ===== História: avanços encadeados ===== */
+function advance(to){
+  const order=['opReleased','loadDone','loadSent','shipped','received','routeDone','kitShipped','accepted'];
+  const n=order.indexOf(to);
+  if(n>=0 && S.ops['OP-3310']==='Pendente') S.ops['OP-3310']='Liberado';
+  if(n>=1 && S.load.seq<LOAD_SEQ.length){ while(S.load.seq<LOAD_SEQ.length){ const r=LOAD_SEQ[S.load.seq++]; S.load.reads.push({...r,t:'16:3'+S.load.seq}); } S.load.last=null; }
+  if(n>=2 && S.mn0457==='Em Conferência') S.mn0457='Aguardando Aprovação';
+  if(n>=3 && S.mn0457==='Aguardando Aprovação') S.mn0457='Em Trânsito';
+  if(n===4 || (to==='accepted')){ if(S.mn0457!=='Recebido'){ S.recv.reads=['PC-000201','PC-000202','PC-000203','PC-000204','PC-000205','PC-000206','PC-000207','PC-000208'].map((c,i)=>({c,ok:true,t:'17:'+(35+i),sub:'Guardar em '+GUARD})); S.recv.seq=RECV_SEQ.length; S.mn0457='Recebido'; } }
+  if(n>=5){ S.route.idx=KIT142.length; S.k142ready=true; }
+  if(n>=6 && S.kits['KT-0142']==='Em Separação'){ S.kits['KT-0142']='Em Trânsito'; S.ship={scanned:true,carrier:S.ship.carrier||'Transporte interno',t:'18:05'}; }
+  if(n>=7){ S.accept.got=[0,1,2,3,4]; S.accept.seq=ACC_SEQ.length; S.kits['KT-0142']='Entregue Parcial'; }
+}
+
+/* ===== Ações ===== */
+function toast(k,m){ const t={id:Math.random(),k,m,dev:S.device}; S.toasts.push(t); setTimeout(()=>{S.toasts=S.toasts.filter(x=>x!==t); render();},3400); }
+const now = () => clock();
+const A = {
+  device:v=>{S.device=v;S.pop=null;},
+  pick:v=>{const d=S.device; S.prof[d]=v; S.scr[d]=MENUS[v][0][0]; S.pop=null; S.drawer=false; S.lock=null;},
+  swap:()=>{S.prof[S.device]=null; S.pop=null; S.modal=null; S.drawer=false; S.lock=null;},
+  go:v=>{S.scr[S.device]=v; S.pop=null; S.drawer=false; S.justSent=false;},
+  theme:()=>{S.theme[S.device]=S.theme[S.device]==='light'?'dark':'light';},
+  bell:()=>{S.pop=S.pop==='bell'?null:'bell';},
+  toast:v=>{const [k,m]=v.split('|'); toast(k,m);},
+  hsGo:v=>{const [code,scr]=v.split('|'); S.scr.web=scr; S.pop=null; if(scr==='E-ADM4'){S.trace.q=code; S.trace.mode=code.startsWith('LT')?'Lote':'Código';} if(scr==='T-ADM3'){S.ksel=code;S.drawer=true;} if(scr==='F-ADM2'&&OPS.find(o=>o.id===code)) S.opSel=code;},
+  opsTab:v=>{S.tab.ordersTab=v;}, opSel:v=>{S.opSel=v;},
+  releaseOp:()=>{S.ops[S.opSel]='Liberado'; toast('ok',`${S.opSel} liberado para etiquetagem. ${S.opSel==='OP-3310'?'Bruno Lima foi avisado no app.':''}`);},
+  simSend:()=>{advance('loadSent'); toast('ok','Bruno Lima enviou a conferência da MN-0457 (8/10).');},
+  authorize:()=>{S.mn0457='Em Trânsito'; toast('ok','Expedição da MN-0457 autorizada. Status: Em Trânsito.');},
+  prio:v=>{const [k,d]=v.split('|'), q=S.queue, i=q.indexOf(k), j=i+(+d); if(j<0||j>=q.length) return; [q[i],q[j]]=[q[j],q[i]]; toast('ok',`${k} agora é o ${j+1}º da fila.`);},
+  dispatch:v=>{ if(!S.assignee[v]){toast('bad','Escolha o responsável antes de disparar a coleta.');return;} S.kits[v]='Em Separação'; toast('ok',`Ordem de coleta do ${v} enviada para ${S.assignee[v]}.`);},
+  traceMode:v=>{S.trace.mode=v; if(v==='Lote') S.trace.q='LT-2026-088'; if(v==='Código') S.trace.q='PC-000098';},
+  trace:v=>{S.trace.q=v; S.trace.mode=v.startsWith('LT')?'Lote':S.trace.mode==='QR Code'?'QR Code':'Código'; if(S.trace.mode==='QR Code') toast('ok','QR lido: '+v);},
+  addItem:v=>{const c=CATALOG.find(x=>x[0]===v); S.req.items.push([v,1,c[2]]); S.justSent=false;},
+  rmItem:v=>{S.req.items.splice(+v,1);},
+  qty:v=>{const [i,d]=v.split('|').map(Number); S.req.items[i][1]=Math.max(1,S.req.items[i][1]+d);},
+  reqPrio:v=>{S.req.prio=v;},
+  sendReq:()=>{ const id='KT-0'+(146+S.extraKits.length); S.extraKits.push({id,proto:PROTOS[S.req.proto].name,items:S.req.items.map(x=>[...x]),prio:S.req.prio,partial:S.req.partial}); S.kits[id]='Aguardando Separação'; S.queue.push(id); S.assignee[id]=''; S.req.items=[]; S.justSent=true; toast('ok',`${id} enviado ao Estoque.`);},
+  kview:v=>{S.kview=v;},
+  openKit:v=>{S.ksel=v; S.drawer=true; S.scr.web='T-ADM3';},
+  closeDrawer:()=>{S.drawer=false;},
+  simRelease:()=>{advance('opReleased'); toast('ok','Carla Mendes liberou a OP-3310.');},
+  labelQty:v=>{S.labels.qty=Math.min(10,Math.max(4,(S.labels.qty||10)+(+v)));},
+  print:()=>{ S.modal={type:'print',p:0}; const iv=setInterval(()=>{ if(!S.modal||S.modal.type!=='print'){clearInterval(iv);return;} S.modal.p=Math.min(100,S.modal.p+10); if(S.modal.p>=100){clearInterval(iv); S.labels.printed=true;} render(); },220);},
+  loadScan:()=>{ const r=LOAD_SEQ[S.load.seq++]; const rec={...r,t:now()}; S.load.reads.push(rec); S.load.last=rec; },
+  loadSend:()=>{ S.mn0457='Aguardando Aprovação'; toast('ok','Conferência enviada para Carla Mendes aprovar.');},
+  tabM:v=>{S.tab.marcos=v;},
+  simArrive:()=>{advance('shipped'); toast('ok','MN-0457 chegou na doca 2.');},
+  recvScan:()=>{ const r=RECV_SEQ[S.recv.seq++]; const rec={...r,t:now(),sub:'Guardar em '+GUARD}; S.recv.reads.push(rec); S.recv.last=rec; },
+  photo:v=>{ if(v==='recv') S.recv.photo=true; else if(S.modal) S.modal.photo=true; },
+  damage:()=>{ if(!S.recv.photo){toast('warn','Tire a foto da peça antes de registrar a avaria.');return;} S.recv.damage=true; toast('ok','Avaria registrada e enviada para Ricardo Alves.');},
+  recvDone:()=>{ S.mn0457='Recebido'; toast('ok','MN-0457 recebida. 1 Farol LED reservado para completar o KT-0142.');},
+  routeScan:()=>{ const it=KIT142[S.route.idx];
+    if(S.route.idx===1&&!S.route.badTried){ S.route.badTried=true; S.route.last={c:'PC-000412',ok:false,msg:'Peça não pertence a este kit'}; return; }
+    S.route.last={c:it.code,ok:true}; S.route.idx++; toast('ok',`${it.p} ×${it.q} coletado.`);},
+  routeMiss:()=>{S.modal={type:'partial'};},
+  partialYes:()=>{ S.modal=null; S.route.idx=KIT142.length; S.k142ready=true; S.tab.marcos='Kits para Despacho'; toast('ok','KT-0142 pronto para despacho (parcial).');},
+  partialNo:()=>{ S.modal=null; toast('warn','Coleta pausada até o Farol LED esquerdo chegar.');},
+  showLock:()=>{S.lock='KT-0139';}, unlock:()=>{S.lock=null; S.scr.mob='E-FUNC1'; S.tab.marcos='Montagem de Kits';},
+  shipScan:()=>{S.ship.scanned=true; S.ship.t=now(); toast('ok','Caixa CX-KT-0142 confirmada.');},
+  carrier:v=>{S.ship.carrier=v;},
+  shipConfirm:()=>{ S.kits['KT-0142']='Em Trânsito'; toast('ok','KT-0142 expedido para a oficina de protótipos.');},
+  simKitArrive:()=>{advance('kitShipped'); toast('ok','KT-0142 chegou na oficina.');},
+  accScan:()=>{ const r=ACC_SEQ[S.accept.seq++], it=KIT142[r.i]; const rec={c:it.code,ok:r.ok,msg:r.msg}; S.accept.last=rec; if(r.ok&&!S.accept.got.includes(r.i)) S.accept.got.push(r.i); },
+  report:()=>{S.modal={type:'report'};},
+  reportSend:()=>{ S.modal=null; S.accept.reported=true; toast('ok','Relato enviado ao Estoque com foto.');},
+  accept:()=>{ S.kits['KT-0142']='Entregue Parcial'; toast('ok','KT-0142 aceito. SUV X liberado para montagem.');},
+  modalClose:()=>{S.modal=null;},
+  skipEnd:()=>{ advance('opReleased'); S.labels.printed=true; advance('loadSent'); advance('shipped'); advance('received'); advance('accepted'); S.kits['KT-0145']='Em Separação'; S.assignee['KT-0145']='Marcos Souza'; toast('ok','Demo no fim da história: KT-0142 entregue parcial.');},
+  reset:()=>{ const dev=S.device; S=fresh(); S.device=dev; toast('ok','Demo reiniciada.');}
+};
+root.addEventListener('click', e=>{
+  const el=e.target.closest('[data-a]'); if(!el||el.disabled) return;
+  if(el.tagName==='INPUT'||el.tagName==='SELECT') return;
+  if(el.dataset.a==='bell'&&el.tagName==='DIV'){ S.pop=null; render(); return; }
+  e.preventDefault();
+  const f=A[el.dataset.a]; if(!f) return; f(el.dataset.v, el); render();
+});
+root.addEventListener('change', e=>{
+  const el=e.target;
+  if(el.dataset.bind){ const [o,k]=el.dataset.bind.split('.'); S[o][k]=el.value; render(); return; }
+  const a=el.dataset.a;
+  if(a==='assign'){ S.assignee[el.dataset.v]=el.value; if(el.value) toast('ok',`${el.dataset.v} atribuído a ${el.value}.`); render(); }
+  if(a==='toggleB'){ S.req.items[+el.dataset.v][2]=el.checked; render(); }
+  if(a==='partial'){ S.req.partial=el.checked; render(); }
+});
+root.addEventListener('input', e=>{
+  if(e.target.dataset.live==='catalog'){ S.req.q=e.target.value; const box=root.querySelector('#catalog-results'); if(box) box.innerHTML=catalogResults(); }
+});
+root.addEventListener('submit', e=>{
+  e.preventDefault(); const f=e.target.dataset.form;
+  if(f==='hsearch'){ S.hsq=root.querySelector('#hs-q').value; S.pop='search'; }
+  if(f==='trace'){ S.trace.q=root.querySelector('#trace-q').value; }
+  if(f==='map'){ const m=S.map, part=root.querySelector('#m-p').value; toast('ok',`Endereço ${m.c}-${m.s}-${m.n}-${m.b} salvo para ${part}.`); }
+  render();
+});
+render();
+
+</script>
+
+</body></html>
