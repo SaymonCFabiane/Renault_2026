@@ -106,14 +106,15 @@ class IaServico extends ChangeNotifier with WidgetsBindingObserver {
 
   Future<void> _iniciarCamera() async {
     try {
-      final cams = await availableCameras();
+      const limite = Duration(seconds: 5);
+      final cams = await availableCameras().timeout(limite);
       if (cams.isEmpty) {
         _falhaCamera(IaEstado.semCamera, 'Nenhuma câmera encontrada');
         return;
       }
       final traseira = cams.firstWhere((c) => c.lensDirection == CameraLensDirection.back, orElse: () => cams.first);
       final c = CameraController(traseira, ResolutionPreset.medium, enableAudio: false, imageFormatGroup: ImageFormatGroup.nv21);
-      await c.initialize();
+      await c.initialize().timeout(limite);
       await c.lockCaptureOrientation(DeviceOrientation.portraitUp);
       rotacao = traseira.sensorOrientation;
       if (_usuarios == 0 || _descartado) {
@@ -126,6 +127,8 @@ class IaServico extends ChangeNotifier with WidgetsBindingObserver {
     } on CameraException catch (e) {
       final negada = e.code.contains('AccessDenied') || e.code.contains('Permission');
       _falhaCamera(negada ? IaEstado.semPermissao : IaEstado.semCamera, negada ? 'Permissão da câmera negada' : 'Câmera: ${e.description ?? e.code}');
+    } on TimeoutException {
+      _falhaCamera(IaEstado.semCamera, 'A câmera não respondeu');
     } catch (e) {
       _falhaCamera(IaEstado.semCamera, 'Câmera indisponível: $e');
     }
@@ -275,11 +278,11 @@ class IaServico extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState s) {
+  void didChangeAppLifecycleState(AppLifecycleState state) {
     // Libera a câmera quando o app vai para segundo plano e retoma ao voltar.
-    if (s == AppLifecycleState.paused || s == AppLifecycleState.inactive) {
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
       if (camera != null) _pararTudo().then((_) => _mudar(IaEstado.desligada));
-    } else if (s == AppLifecycleState.resumed && _usuarios > 0) {
+    } else if (state == AppLifecycleState.resumed && _usuarios > 0) {
       _ligar();
     }
   }

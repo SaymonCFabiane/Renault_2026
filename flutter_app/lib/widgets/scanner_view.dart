@@ -86,9 +86,8 @@ class _ScannerViewState extends State<ScannerView> with SingleTickerProviderStat
             borderRadius: BorderRadius.circular(TpRadius.radiusCard),
             gradient: const RadialGradient(center: Alignment(0, -.1), radius: .9, colors: [Color(0xFF23404D), Color(0xFF0D1A20)]),
           ),
-          foregroundDecoration: last == null
-              ? null
-              : BoxDecoration(borderRadius: BorderRadius.circular(TpRadius.radiusCard), border: Border.all(color: color, width: 4)),
+          foregroundDecoration:
+              last == null ? null : BoxDecoration(borderRadius: BorderRadius.circular(TpRadius.radiusCard), border: Border.all(color: color, width: 4)),
           child: LayoutBuilder(builder: (context, box) {
             final side = box.maxWidth * .58;
             return Stack(alignment: Alignment.center, children: [

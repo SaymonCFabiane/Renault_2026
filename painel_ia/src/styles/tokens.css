@@ -1,0 +1,70 @@
+/* Gerado a partir de docs/referencia/design-tokens.json. Tema claro no :root; escuro em :root[data-theme="dark"] (atributo posto no <html>). */
+:root {
+  --primary: #265267;
+  --on-primary: #ffffff;
+  --primary-soft: #BCD2DD;
+  --sidebar: #265267;
+  --content-bg: #C8E1ED;
+  --surface: #F6FAFD;
+  --surface-muted: #D4E0E7;
+  --text: #1E2F38;
+  --text-secondary: #5B6B75;
+  --line: #D4E0E7;
+  --data: #547C90;
+  --data-light: #B7CCD6;
+  --accent: #C2703D;
+  --accent-text: #9E5528;
+  --accent-bg: #F5DED1;
+  --success: #2F7A5B;
+  --success-bg: #E3F5EE;
+  --warning: #E0A526;
+  --warning-text: #7A5200;
+  --warning-bg: #FFF4D6;
+  --danger: #C0392B;
+  --danger-bg: #FBE4E1;
+  --on-status: #ffffff;
+  --shadow-float: 0 16px 40px #0b1a2233;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --grid-gutter: 20px;
+  --grid-margin: 30px;
+  --radius-icon: 8px;
+  --radius-card: 12px;
+  --radius-pill: 999px;
+  --touch-min: 48px;
+  --sidebar-width: 240px;
+  --control-height: 40px;
+  --font-sans: "Nunito", ui-rounded, "SF Pro Rounded", system-ui, sans-serif;
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --primary: #8DBBD0;
+  --on-primary: #10222B;
+  --primary-soft: #2C4F60;
+  --sidebar: #2E6078;
+  --content-bg: #193A4A;
+  --surface: #121212;
+  --surface-muted: #2A3E48;
+  --text: #EEF3F6;
+  --text-secondary: #A9BAC3;
+  --line: #2F4450;
+  --data: #6E97AB;
+  --accent: #D98A57;
+  --accent-text: #E9A277;
+  --accent-bg: #3A2518;
+  --success: #5CC096;
+  --success-bg: #15302A;
+  --warning-text: #F0C35A;
+  --warning-bg: #3A2E10;
+  --danger: #EF6B5D;
+  --danger-bg: #3D1A16;
+  --on-status: #121212;
+  --shadow-float: 0 16px 40px #000000b3;
+  color-scheme: dark;
+}

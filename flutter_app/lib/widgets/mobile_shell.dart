@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../data/mock_data.dart';
+import '../ia/ia_config_sheet.dart';
+import '../ia/ia_servico.dart';
 import '../state/demo_state.dart';
 import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
@@ -32,6 +34,7 @@ Future<void> showDemoMenu(BuildContext context, DemoState s) {
           item(LucideIcons.skipForward, 'Pular para o fim da história', s.skipEnd),
           item(LucideIcons.rotateCcw, 'Reiniciar demo', s.reset),
           item(LucideIcons.arrowLeftRight, 'Trocar perfil', s.swapProfile),
+          if (IaScope.read(context) != null) item(LucideIcons.scanEye, 'Servidor de IA', () => abrirConfigIa(context)),
           const SizedBox(height: 8),
         ]),
       );

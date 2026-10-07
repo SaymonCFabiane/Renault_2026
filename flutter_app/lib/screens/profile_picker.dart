@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../data/mock_data.dart';
+import '../ia/ia_config_sheet.dart';
+import '../ia/ia_servico.dart';
 import '../state/demo_state.dart';
 import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
@@ -82,6 +84,8 @@ class ProfilePicker extends StatelessWidget {
                 const SizedBox(height: 4),
                 TpButton(label: 'Pular para o fim da história', icon: LucideIcons.skipForward, variant: TpVariant.ghost, small: true, onPressed: s.skipEnd),
                 TpButton(label: 'Reiniciar demo', icon: LucideIcons.rotateCcw, variant: TpVariant.ghost, small: true, onPressed: s.reset),
+                if (IaScope.read(context) != null)
+                  TpButton(label: 'Servidor de IA', icon: LucideIcons.scanEye, variant: TpVariant.ghost, small: true, onPressed: () => abrirConfigIa(context)),
                 const SizedBox(height: 8),
                 const Center(child: Muted('Protótipo · dados fictícios · nada é salvo ao recarregar', size: 12)),
               ],

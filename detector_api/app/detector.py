@@ -60,10 +60,12 @@ class Detector:
         return Parametros(confianca=c.confianca, classes=c.classes, imgsz=c.imgsz, iou=c.iou)
 
     def _aquecer(self) -> None:
-        # A primeira inferência no MPS é lenta (compilação de kernels); fazemos antes de abrir a porta.
-        vazio = np.zeros((480, 640, 3), dtype=np.uint8)
-        for _ in range(2):
-            self.modelo.predict(vazio, imgsz=self.config.imgsz, device=self.dispositivo, verbose=False)
+        # No MPS, a primeira inferência de cada formato de entrada é lenta (compilação de kernels).
+        # Aquecemos os formatos mais comuns antes de abrir a porta: retrato do app, paisagem, 16:9 e quadrado.
+        for h, w in ((640, 480), (480, 640), (720, 1280), (1280, 720), (640, 640)):
+            vazio = np.zeros((h, w, 3), dtype=np.uint8)
+            for _ in range(2):
+                self.modelo.predict(vazio, imgsz=self.config.imgsz, device=self.dispositivo, verbose=False)
 
     def detectar_sync(self, img: np.ndarray, p: Parametros) -> Resultado:
         t0 = time.perf_counter()
