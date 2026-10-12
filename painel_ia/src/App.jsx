@@ -2,12 +2,16 @@ import { useCallback, useEffect, useState } from 'react';
 import { apiBase, buscarStatus } from './api.js';
 import Icon from './components/Icon.jsx';
 import AoVivo from './paginas/AoVivo.jsx';
+import Dataset from './paginas/Dataset.jsx';
 import Status from './paginas/Status.jsx';
 import TesteImagem from './paginas/TesteImagem.jsx';
+import Treinos from './paginas/Treinos.jsx';
 
 const PAGINAS = [
   ['ao-vivo', 'Ao vivo', 'camera', AoVivo],
   ['imagem', 'Teste por imagem', 'image-up', TesteImagem],
+  ['dataset', 'Dataset', 'images', Dataset],
+  ['treinos', 'Treinos', 'activity', Treinos],
   ['status', 'Status e modelo', 'server', Status],
 ];
 
@@ -40,8 +44,14 @@ export default function App() {
   }, [atualizar]);
 
   useEffect(() => { document.documentElement.dataset.theme = tema; }, [tema]);
+  // Links e o botão voltar do navegador trocam de página pelo #endereço.
+  useEffect(() => {
+    const aoMudar = () => setPagina(paginaInicial());
+    window.addEventListener('hashchange', aoMudar);
+    return () => window.removeEventListener('hashchange', aoMudar);
+  }, []);
 
-  const ir = (id) => { setPagina(id); history.replaceState(null, '', `#${id}`); };
+  const ir = (id) => { location.hash = id; };
   const [, titulo, , Pagina] = PAGINAS.find((p) => p[0] === pagina);
   const pill = status?.status === 'ok' ? ['ok', `${status.modelo} · ${status.dispositivo?.toUpperCase()}`] : status ? ['warn', 'API sem modelo'] : ['bad', 'API fora do ar'];
 

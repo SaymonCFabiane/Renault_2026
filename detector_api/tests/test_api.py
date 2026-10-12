@@ -64,8 +64,8 @@ def test_parametros():
 
 # ===== API com o YOLO real =====
 @pytest.fixture(scope="module")
-def cliente():
-    with TestClient(criar_app(Config())) as c:
+def cliente(tmp_path_factory):
+    with TestClient(criar_app(Config(dados_dir=tmp_path_factory.mktemp("dados")))) as c:
         yield c
 
 
@@ -152,8 +152,8 @@ class DetectorLento:
         return {"modelo": "falso", "dispositivo": "cpu", "classes": self.nomes, "versoes": {}}
 
 
-def test_processa_sempre_o_mais_recente():
-    with TestClient(criar_app(Config(), detector=DetectorLento())) as c, c.websocket_connect("/ws/detectar") as ws:
+def test_processa_sempre_o_mais_recente(tmp_path):
+    with TestClient(criar_app(Config(dados_dir=tmp_path), detector=DetectorLento())) as c, c.websocket_connect("/ws/detectar") as ws:
         for seq in range(1, 7):  # 6 quadros em rajada, bem mais rápido que a inferência
             ws.send_bytes(montar_quadro(seq, b"\xff\xd8xxxx"))
         respostas = []

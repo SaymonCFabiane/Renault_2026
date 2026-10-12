@@ -30,6 +30,11 @@ class Config(BaseSettings):
     # Tamanho máximo de um quadro ou imagem recebida.
     max_bytes_imagem: int = 4 * 1024 * 1024
 
+    # Dataset de treino (fotos, caixas e SQLite) e modelo que sugere caixas por exemplo visual.
+    dados_dir: Path = RAIZ / "dados"
+    modelos_dir: Path = RAIZ / "modelos"
+    modelo_sugestao: str = "yoloe-11l-seg.pt"
+
     @field_validator("classes", mode="before")
     @classmethod
     def _classes(cls, v):
@@ -53,6 +58,6 @@ class Config(BaseSettings):
             raise ValueError("imgsz precisa ser múltiplo de 32")
         return v
 
-    def caminho_modelo(self) -> Path:
-        p = Path(self.modelo)
-        return p if p.is_absolute() else RAIZ / "modelos" / p
+    def caminho_modelo(self, nome: str | None = None) -> Path:
+        p = Path(nome or self.modelo)
+        return p if p.is_absolute() else self.modelos_dir / p

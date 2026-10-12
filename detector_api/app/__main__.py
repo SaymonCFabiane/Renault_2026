@@ -1,6 +1,7 @@
 """Sobe a API: python -m app  (lê host e porta da configuração)."""
 
 import logging
+import os
 import socket
 
 import uvicorn
@@ -26,6 +27,8 @@ def ips_locais() -> list[str]:
 
 
 def main() -> None:
+    # Sem telemetria do Ultralytics e sem downloads inesperados (os modelos vêm de baixar_modelo.py).
+    os.environ.setdefault("YOLO_OFFLINE", "1")
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
     c = Config()
     print("\nTracePro · API de detecção", flush=True)

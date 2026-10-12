@@ -6,3 +6,4 @@ __pycache__/
 modelos/*.pt
 dados/
 runs/
+midia/

@@ -67,3 +67,46 @@ export function montarQuadro(seq, capturadoEm, jpeg, rotacao = 0) {
   saida.set(new Uint8Array(jpeg), 4 + cab.length);
   return saida;
 }
+
+/* ===== Dataset de treino ===== */
+async function pedir(caminho, opcoes = {}) {
+  try {
+    const r = await fetch(apiBase() + caminho, opcoes);
+    return await lerJson(r);
+  } catch (e) {
+    if (e instanceof ErroApi) throw e;
+    throw new ErroApi('SEM_CONEXAO', `Não consegui falar com ${apiBase()}. A API está rodando?`);
+  }
+}
+
+const json = (metodo, corpo) => ({ method: metodo, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(corpo) });
+
+export const urlImagem = (id) => `${apiBase()}/dataset/imagens/${id}/arquivo`;
+export const urlMiniatura = (id) => `${apiBase()}/dataset/imagens/${id}/miniatura`;
+export const resumoDataset = () => pedir('/dataset/resumo');
+export const listarImagens = ({ status, classe_id } = {}) => {
+  const q = new URLSearchParams({ limite: 2000 });
+  if (status) q.set('status', status);
+  if (classe_id != null && classe_id !== '') q.set('classe_id', classe_id);
+  return pedir(`/dataset/imagens?${q}`);
+};
+export const salvarCaixas = (id, caixas, status) => pedir(`/dataset/imagens/${id}/caixas`, json('PUT', { caixas, status }));
+export const ajustarImagem = (id, ajuste) => pedir(`/dataset/imagens/${id}`, json('PATCH', ajuste));
+export const iniciarSugestoes = (todas = false) => pedir('/dataset/sugestoes', json('POST', { todas }));
+export const estadoSugestoes = () => pedir('/dataset/sugestoes');
+export const criarClasse = (nome, rotulo) => pedir('/dataset/classes', json('POST', { nome, rotulo }));
+export const enviarFotoDataset = (arquivo, classeId) => {
+  const corpo = new FormData();
+  corpo.append('imagem', arquivo);
+  corpo.append('origem', 'painel');
+  if (classeId) corpo.append('classe_id', classeId);
+  return pedir('/dataset/imagens', { method: 'POST', body: corpo });
+};
+
+/* ===== Treinos e modelos ===== */
+export const listarTreinos = () => pedir('/treinos');
+export const iniciarTreino = (parametros) => pedir('/treinos', json('POST', parametros));
+export const obterTreino = (id) => pedir(`/treinos/${id}`);
+export const cancelarTreino = (id) => pedir(`/treinos/${id}/cancelar`, { method: 'POST' });
+export const listarModelos = () => pedir('/modelos');
+export const ativarModelo = (arquivo) => pedir(`/modelos/${encodeURIComponent(arquivo)}/ativar`, { method: 'POST' });

@@ -39,7 +39,7 @@ def decodificar(jpeg: bytes, rotacao: int) -> np.ndarray:
 
 
 class Detector:
-    def __init__(self, config: Config):
+    def __init__(self, config: Config, executor: ThreadPoolExecutor | None = None):
         from ultralytics import YOLO
 
         self.config = config
@@ -50,8 +50,9 @@ class Detector:
         self.nome_modelo = caminho.name
         self.modelo = YOLO(str(caminho))
         self.nomes: dict[int, str] = {int(k): v for k, v in self.modelo.names.items()}
-        # Uma única thread: o MPS/CUDA não deve receber inferências concorrentes.
-        self._executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="yolo")
+        # Uma única thread para todo uso da GPU (detecção e sugestões): o MPS não aceita concorrência.
+        self._proprio = executor is None
+        self._executor = executor or ThreadPoolExecutor(max_workers=1, thread_name_prefix="gpu")
         self._aquecer()
         log.info("modelo %s carregado em %s (%d classes)", self.nome_modelo, self.dispositivo, len(self.nomes))
 
@@ -102,4 +103,5 @@ class Detector:
         }
 
     def fechar(self) -> None:
-        self._executor.shutdown(wait=False, cancel_futures=True)
+        if self._proprio:
+            self._executor.shutdown(wait=False, cancel_futures=True)

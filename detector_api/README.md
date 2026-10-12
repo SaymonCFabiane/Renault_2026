@@ -46,6 +46,9 @@ Por variável de ambiente ou num arquivo `.env` nesta pasta (prefixo `TRACEPRO_`
 | `TRACEPRO_IMGSZ` | `640` | Tamanho de entrada (múltiplo de 32) |
 | `TRACEPRO_PORTA` | `8000` | Porta (a API escuta em `0.0.0.0`) |
 | `TRACEPRO_CORS_ORIGENS` | `http://localhost:5174,http://127.0.0.1:5174` | Origens liberadas para o painel |
+| `TRACEPRO_DADOS_DIR` | `dados/` | Onde fica o dataset de treino |
+| `TRACEPRO_MODELOS_DIR` | `modelos/` | Onde ficam os modelos (`.pt`) |
+| `TRACEPRO_MODELO_SUGESTAO` | `yoloe-11l-seg.pt` | Modelo que sugere as caixas |
 
 Cada conexão WebSocket pode ajustar confiança, classes e imgsz só para ela (mensagem `config`).
 
@@ -97,6 +100,63 @@ cabeçalho: {"tipo": "quadro", "seq": 1842, "capturado_em": 1759840000123, "rota
 - **API:** a recepção e a inferência são separadas. Existe um único quadro pendente por conexão; se chegar outro, o antigo é descartado (e avisado). A fila nunca cresce, então a latência não aumenta com o tempo.
 - **Inferência:** roda numa thread única fora do loop de eventos (o MPS não aceita inferências concorrentes). Na inicialização, o modelo é aquecido nos formatos de imagem mais comuns.
 
+## Dataset de treino (fase 2)
+
+As fotos para treinar o modelo próprio ficam em `dados/` (fora do Git): um SQLite com classes, fotos e caixas, mais as imagens normalizadas.
+
+```bash
+.venv/bin/python baixar_modelo.py yoloe-11l-seg.pt    # modelo que sugere caixas por exemplo visual (71 MB)
+.venv/bin/python importar_midia.py --sugerir           # importa midia/<classe>/*.jpg e sugere as caixas
+```
+- **Pastas:** cada subpasta de `midia/` vira uma classe (`engrenagem`, `pinca_de_freio`). Os nomes que aparecem no app estão em `ROTULOS`, no início do script.
+- **Repetidas:** fotos repetidas, mesmo com outro nome, não entram de novo; dá para rodar o script quantas vezes quiser.
+- **Divisão:** 80% das fotos vão para treino e 20% para validação, sempre do mesmo jeito para cada foto.
+- **Sugestões:** usam o YOLOE com exemplo visual. Para cada classe, até 3 fotos já revisadas servem de modelo ("esta é a peça"). Antes da primeira revisão, valem as caixas-semente marcadas no script.
+
+A revisão é feita no painel (`painel_ia` → Dataset). As rotas ficam em `/dataset/...` (veja `/docs`):
+
+| Rota | O que faz |
+| --- | --- |
+| `GET /dataset/resumo` | Totais por status, por divisão e por classe |
+| `GET/POST /dataset/classes`, `PUT /dataset/classes/{id}` | Classes (nome sem acento + rótulo exibido) |
+| `GET /dataset/imagens?status=&classe_id=` | Fotos com as caixas |
+| `POST /dataset/imagens` | Envia uma foto (multipart `imagem`, `origem`=painel/app, `classe_id` opcional) |
+| `GET /dataset/imagens/{id}/arquivo` e `/miniatura` | A foto e a miniatura |
+| `PUT /dataset/imagens/{id}/caixas` | Substitui as caixas; `"status": "revisada"` ao confirmar |
+| `PATCH /dataset/imagens/{id}` | Muda `status` (ex.: `descartada`) ou `divisao` |
+| `POST /dataset/sugestoes`, `GET /dataset/sugestoes` | Sugere caixas para as fotos sem caixa e mostra o progresso |
+
+**Status de cada foto:** `pendente` (sem caixa), `sugerida` (caixa automática, ainda não conferida), `revisada` (conferida por uma pessoa e pronta para treino) e `descartada` (fora do treino). Uma foto revisada sem caixas entra no treino como exemplo sem peça.
+
+As sugestões rodam na mesma thread da GPU que a detecção ao vivo, foto a foto, e por isso não travam o vídeo.
+
+## Treino e modelos
+
+O treino é iniciado pelo painel (Treinos) e roda num processo separado. A API continua respondendo, mas a detecção ao vivo fica mais lenta enquanto a GPU é dividida.
+
+- **Exportação:** cada treino exporta as fotos revisadas no formato YOLO para `dados/treinos/<id>/dataset/`. O nome de cada classe no modelo é o rótulo ("Pinça de freio"), que aparece direto no app.
+- **Base e parada:** o treino parte do `yolo11n.pt` (rápido) ou do `yolo11s.pt` (mais preciso; baixe com `baixar_modelo.py yolo11s.pt`) e para sozinho se as métricas pararem de melhorar.
+- **Progresso:** sai a cada época em `dados/treinos/<id>/info.json`, e o registro completo em `treino.log`.
+- **Resultado:** o melhor modelo vai para `modelos/tracepro-<id>.pt`, com um `.json` de métricas ao lado.
+- **Ativação:** `POST /modelos/{arquivo}/ativar` troca o modelo sem reiniciar e fica salvo em `dados/modelo_ativo.txt`; ao subir de novo, a API usa o mesmo modelo.
+
+| Rota | O que faz |
+| --- | --- |
+| `GET /treinos` | Treino em andamento, problemas que impedem treinar, dataset e histórico |
+| `POST /treinos` | Inicia: `{"base": "yolo11n.pt", "epocas": 80, "imgsz": 640}` |
+| `GET /treinos/{id}` | Situação, época atual, métricas por época e fim do registro |
+| `POST /treinos/{id}/cancelar` | Cancela |
+| `GET /modelos` | Modelos em `modelos/`, com tipo, classes, métricas e qual está em uso |
+| `POST /modelos/{arquivo}/ativar` | Passa a detectar com esse modelo (app e painel) |
+
+Como ler as métricas (calculadas nas fotos de validação, que o modelo não vê no treino):
+- **mAP50 ("acerto"):** acha a peça certa com a caixa no lugar aproximado. Acima de 80–90% já é bom.
+- **mAP50-95:** exige a caixa bem ajustada; costuma ficar abaixo do mAP50.
+- **Precisão:** das caixas que o modelo desenhou, quantas estavam certas (poucos alarmes falsos).
+- **Revocação:** das peças que estavam nas fotos, quantas ele achou (poucas peças perdidas).
+
+A API e o treino rodam com `YOLO_OFFLINE=1`: o Ultralytics não envia dados de uso nem baixa nada sozinho.
+
 ## Testar sem o app
 
 ```bash
@@ -115,7 +175,9 @@ Testes automáticos: `.venv/bin/python -m pytest -q`.
 - `app/protocolo.py`: formato das mensagens e erros padronizados
 - `app/detector.py`: carga do YOLO, escolha do dispositivo e inferência numa thread
 - `app/main.py`: rotas HTTP, WebSocket e controle de fluxo
-- `cliente_teste.py`, `baixar_modelo.py`, `tests/`
+- `app/dataset.py`, `app/rotas_dataset.py`, `app/sugestor.py`: dataset de treino, rotas e sugestão de caixas
+- `app/treino.py`, `app/treinar.py`, `app/rotas_treino.py`: exportação, processo de treino, catálogo e ativação de modelos
+- `cliente_teste.py`, `baixar_modelo.py`, `importar_midia.py`, `tests/`
 
 ## Licença do Ultralytics
 O Ultralytics YOLO é AGPL-3.0. Para demonstração e uso interno não há problema. Se a API for oferecida como serviço para terceiros (por exemplo, a Montadora), a AGPL exige publicar o código ou contratar a licença Enterprise da Ultralytics.

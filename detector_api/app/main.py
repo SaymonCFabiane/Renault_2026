@@ -7,6 +7,7 @@ import asyncio
 import json
 import logging
 import time
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import asynccontextmanager
 from typing import Any
 
@@ -17,6 +18,11 @@ from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from .config import VERSAO, Config
+from .dataset import Dataset
+from .rotas_dataset import rotas as rotas_dataset
+from .rotas_treino import rotas as rotas_treino
+from .sugestor import Tarefa
+from .treino import Treinos
 from .protocolo import Codigo, ErroProtocolo, Parametros, Quadro, erro_http, erro_ws, ler_quadro, validar_rotacao
 
 log = logging.getLogger("tracepro.api")
@@ -38,25 +44,41 @@ def criar_app(config: Config | None = None, detector: Any = None) -> FastAPI:
     @asynccontextmanager
     async def ciclo(app: FastAPI):
         app.state.erro_modelo = None
+        # Uma única thread para toda a GPU: detecção ao vivo e sugestões de caixas se revezam nela.
+        app.state.gpu = ThreadPoolExecutor(max_workers=1, thread_name_prefix="gpu")
+        app.state.dataset = Dataset(config.dados_dir)
+        app.state.sugestor = None
+        app.state.tarefa_sugestao = Tarefa()
+        app.state.treinos = Treinos(app.state.dataset, config.dados_dir / "treinos", config.modelos_dir)
+        # O modelo ativado no painel vale também depois de reiniciar a API.
+        app.state.modelo_ativo = modelo_salvo(config) or config.modelo
         if detector is not None:
             app.state.detector = detector
         else:
             try:
                 from .detector import Detector
 
-                app.state.detector = await asyncio.to_thread(Detector, config)
+                cfg = config.model_copy(update={"modelo": app.state.modelo_ativo})
+                loop = asyncio.get_running_loop()
+                app.state.detector = await loop.run_in_executor(app.state.gpu, Detector, cfg, app.state.gpu)
             except Exception as e:  # a API sobe mesmo sem modelo, e o /status explica o motivo
                 log.exception("falha ao carregar o modelo")
                 app.state.detector = None
                 app.state.erro_modelo = str(e)
         yield
+        if app.state.tarefa_sugestao._tarefa is not None:
+            app.state.tarefa_sugestao._tarefa.cancel()
         if app.state.detector is not None and hasattr(app.state.detector, "fechar"):
             app.state.detector.fechar()
+        app.state.gpu.shutdown(wait=False, cancel_futures=True)
+        app.state.dataset.fechar()
 
     app = FastAPI(title="TracePro · API de detecção", version=VERSAO, lifespan=ciclo)
     app.state.config = config
     app.state.conexoes = 0
     app.add_middleware(CORSMiddleware, allow_origins=config.cors_origens, allow_methods=["*"], allow_headers=["*"])
+    app.include_router(rotas_dataset)
+    app.include_router(rotas_treino)
 
     # ===== Erros no formato padronizado {"erro": {"codigo", "mensagem"}} =====
     @app.exception_handler(ErroProtocolo)
@@ -91,7 +113,7 @@ def criar_app(config: Config | None = None, detector: Any = None) -> FastAPI:
             "parametros": {"confianca": config.confianca, "classes": config.classes, "imgsz": config.imgsz, "iou": config.iou},
         }
         if d is None:
-            base.update({"modelo": config.modelo, "dispositivo": None, "erro": app.state.erro_modelo})
+            base.update({"modelo": getattr(app.state, "modelo_ativo", config.modelo), "dispositivo": None, "erro": app.state.erro_modelo})
         else:
             base.update(d.info())
         return base
@@ -99,7 +121,7 @@ def criar_app(config: Config | None = None, detector: Any = None) -> FastAPI:
     # ===== HTTP =====
     @app.get("/")
     async def raiz():
-        return {"nome": "TracePro · API de detecção", "versao": VERSAO, "rotas": ["/status", "/detectar", "/ws/detectar", "/docs"]}
+        return {"nome": "TracePro · API de detecção", "versao": VERSAO, "rotas": ["/status", "/detectar", "/ws/detectar", "/dataset/...", "/docs"]}
 
     @app.get("/status")
     async def status():
@@ -219,6 +241,16 @@ def criar_app(config: Config | None = None, detector: Any = None) -> FastAPI:
             await enviar(erro_ws(Codigo.MENSAGEM_DESCONHECIDA, f"tipo de mensagem desconhecido: {tipo!r}"))
 
     return app
+
+
+def modelo_salvo(config: Config) -> str | None:
+    """Modelo ativado pelo painel (dados/modelo_ativo.txt), se o arquivo ainda existir."""
+    p = config.dados_dir / "modelo_ativo.txt"
+    if p.exists():
+        nome = p.read_text(encoding="utf-8").strip()
+        if nome and config.caminho_modelo(nome).exists():
+            return nome
+    return None
 
 
 class Sessao:
