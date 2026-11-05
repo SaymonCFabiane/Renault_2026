@@ -1,5 +1,5 @@
-import { useNavigate } from 'react-router-dom';
-import { PATHS, PROTOS } from '../../data/mock.js';
+import { PROTOS } from '../../data/mock.js';
+import { useIrPara } from '../../state/somenteLeitura.js';
 import { useDemo } from '../../state/useDemo.js';
 import { kitPrio, kitProto, kitStatus } from '../../state/logic.js';
 import Card, { Col } from '../../components/Card.jsx';
@@ -11,17 +11,17 @@ import Icon from '../../components/Icon.jsx';
 import LineChart from '../../components/charts/LineChart.jsx';
 import Gauge from '../../components/charts/Gauge.jsx';
 
-// T-ADM1 · Painel do Testes
+// T-ADM1 · Painel do Cliente
 export default function Dashboard() {
   const { S, act } = useDemo();
-  const navigate = useNavigate();
+  const ir = useIrPara();
   const cards = [
     ['hatch', 'circle-check', 'ok', 'Pronto para Teste', 'KT-0138 entregue completo em 24/09'],
     ['suv', 'timer', 'data', 'Em Montagem', `KT-0142 · ${S.kits['KT-0142']}`],
     ['pickup', 'lock', 'danger', 'Parado por Peça Blocante', 'KT-0139 · falta Pinça de freio traseira'],
   ];
   const kits = ['KT-0142', 'KT-0139', 'KT-0145', ...S.extraKits.map((x) => x.id)];
-  const openKit = (k) => { act('openKit', k); navigate(PATHS['T-ADM3']); };
+  const openKit = (k) => { act('openKit', k); ir('T-ADM3'); };
   return (
     <div className="tp-grid">
       {cards.map(([id, icon, v, sts, sub]) => (
@@ -49,7 +49,7 @@ export default function Dashboard() {
         </Card>
       </Col>
       <Col span={12}>
-        <Card title="Kits em andamento" extra={<Button variant="outline" size="sm" onClick={() => navigate(PATHS['T-ADM3'])}>Ver acompanhamento</Button>}>
+        <Card title="Kits em andamento" extra={<Button variant="outline" size="sm" consulta onClick={() => ir('T-ADM3')}>Ver acompanhamento</Button>}>
           <DataTable head={<><SortTh>Kit</SortTh><SortTh>Protótipo</SortTh><SortTh>Prioridade</SortTh><SortTh>Status</SortTh></>}>
             {kits.map((k) => (
               <tr key={k} className="is-clickable" onClick={() => openKit(k)}>

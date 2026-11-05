@@ -64,21 +64,55 @@ void main() {
     }
     expect(bad, 1);
     expect(s.recvOkCount, 8);
+
+    // Inspeção de qualidade peça a peça: motivo e foto são obrigatórios.
+    expect(find.text('Inspeção de qualidade'), findsOneWidget);
+    await tap('Reprovar', index: 2); // PC-000203
+    await tap('Confirmar reprovação');
+    expect(s.recvReprovadas, isEmpty);
+    await tap('Avaria ou trinca');
+    await tap('Confirmar reprovação');
+    expect(s.recvReprovadas, isEmpty);
+    await tap('Tirar foto da peça');
+    await tap('Confirmar reprovação');
+    expect(s.recvReprovadas, {'PC-000203': 'Avaria ou trinca'});
+    await tap('Reprovar', index: 4); // PC-000206
+    await tap('Peça errada');
+    await tap('Tirar foto da peça');
+    await tap('Confirmar reprovação');
+    expect(s.recvReprovadas.keys, ['PC-000203', 'PC-000206']);
+    expect(find.text('Bloqueada · Peça errada · Q-01-03-01-01'), findsOneWidget);
     await tap('Concluir recebimento');
     expect(s.mn0457, 'Recebido');
+    expect(find.textContaining('6 peças guardadas'), findsOneWidget);
+    expect(find.textContaining('2 bloqueadas na quarentena Q-01-03-01-01'), findsOneWidget);
 
-    // Coleta do KT-0142 com leitura inválida e kit parcial.
+    // Coleta do KT-0142: só falta a Pinça de freio. A Engrenagem é recusada; a Pinça fecha o kit (parcial).
     await tap('Coleta');
-    await tap('Simular leitura do QR');
-    await tap('Simular leitura do QR');
-    expect(find.text('Peça não pertence a este kit'), findsOneWidget);
-    for (var i = 0; i < 4; i++) {
-      await tap('Simular leitura do QR');
-    }
-    await tap('Registrar falta');
-    expect(find.text('Despachar Kit Parcial?'), findsOneWidget);
-    await tap('Despachar parcial');
+    expect(find.text('Falta 1 peça'), findsOneWidget);
+    expect(find.text('Simular leitura do QR'), findsNothing);
+    s.coletarRotaPorIa('Engrenagem');
+    await tester.pump(const Duration(milliseconds: 150));
+    expect(find.text('Engrenagem não pertence a este kit'), findsOneWidget);
+    expect(s.k142ready, isFalse);
+    s.coletarRotaPorIa('Pinça de freio');
+    await tester.pump(const Duration(milliseconds: 150));
+    expect(find.text('Kit fechado · parcial'), findsOneWidget);
     expect(s.k142ready, isTrue);
+
+    // KT-0145: faltam 2 peças, validadas pela câmera (a IA chama coletarPorIa com a classe detectada).
+    await tap('Tarefas');
+    await tap('Montagem');
+    await tap('Coletar com a câmera');
+    expect(find.text('Coleta do KT-0145'), findsWidgets);
+    expect(find.text('Simular leitura'), findsNothing);
+    expect(find.text('3 de 5'), findsOneWidget);
+    s.coletarPorIa('Engrenagem');
+    s.coletarPorIa('Pinça de freio');
+    await tester.pump(const Duration(milliseconds: 150));
+    expect(s.col145.length, 5);
+    await tap('Concluir montagem');
+    expect(s.k145ready, isTrue);
 
     // Exceção: coleta travada do KT-0139.
     await tap('Coleta');
@@ -98,9 +132,16 @@ void main() {
     await tap('Fernanda Rocha');
     expect(find.text('KT-0142 chegou'), findsOneWidget);
     await tap('KT-0142 chegou');
-    for (var i = 0; i < 6; i++) {
-      await tap('Simular leitura');
-    }
+    // Só falta a Pinça de freio, conferida pela câmera; a Engrenagem é recusada.
+    expect(find.text('Simular leitura'), findsNothing);
+    expect(s.accGot.length, 4);
+    s.conferirPorIa('Engrenagem');
+    await tester.pump(const Duration(milliseconds: 150));
+    expect(find.text('Engrenagem não pertence a este kit'), findsOneWidget);
+    expect(s.accGot.length, 4);
+    s.conferirPorIa('Pinça de freio');
+    await tester.pump(const Duration(milliseconds: 150));
+    expect(s.accGot.length, 5);
     await tap('Reportar Peça Danificada/Incompatível');
     await tap('Tirar foto');
     expect(find.text('Foto anexada'), findsOneWidget);

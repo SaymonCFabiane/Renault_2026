@@ -9,6 +9,7 @@ import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 import 'bottom_nav.dart';
 import 'buttons.dart';
+import 'facetas.dart';
 import 'cards.dart';
 import 'lock_screen.dart';
 import 'modal.dart';
@@ -110,66 +111,70 @@ class _Header extends StatelessWidget {
     final c = TpColors.of(context);
     const white = Colors.white;
     return Container(
-      decoration: BoxDecoration(color: c.sidebar, borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24))),
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 6, 8, 18),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Row(children: [
-              Semantics(
-                button: true,
-                label: 'Opções da demo',
-                child: InkWell(
-                  customBorder: const CircleBorder(),
-                  onTap: () => showDemoMenu(context, state),
-                  child: Padding(padding: const EdgeInsets.all(2), child: TpAvatar(profile.initials)),
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(gradient: c.degradeMarca, borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24))),
+      child: Stack(children: [
+        const Positioned.fill(child: FacetasMarca()),
+        SafeArea(
+          bottom: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 6, 8, 18),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Row(children: [
+                Semantics(
+                  button: true,
+                  label: 'Opções da demo',
+                  child: InkWell(
+                    customBorder: const CircleBorder(),
+                    onTap: () => showDemoMenu(context, state),
+                    child: Padding(padding: const EdgeInsets.all(2), child: TpAvatar(profile.initials)),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(profile.name, style: const TextStyle(color: white, fontSize: 17, fontWeight: FontWeight.w700, height: 1.2)),
-                  Text('${profile.role} · ${profile.module}', maxLines: 2, style: const TextStyle(color: Color(0xDDFFFFFF), fontSize: 13, height: 1.3)),
-                ]),
-              ),
-              TpIconButton(
-                icon: state.dark ? LucideIcons.sun : LucideIcons.moon,
-                tooltip: state.dark ? 'Mudar para o tema claro' : 'Mudar para o tema escuro',
-                color: white,
-                onTap: state.toggleTheme,
-              ),
-              // Defeito 3: "Trocar perfil" visível em todas as telas.
-              TpIconButton(icon: LucideIcons.arrowLeftRight, tooltip: 'Trocar perfil', color: white, onTap: state.swapProfile),
-              TpIconButton(icon: LucideIcons.bell, tooltip: 'Notificações', color: white, badge: notes[profile.id]!.length, onTap: state.toggleNotes),
-            ]),
-            const SizedBox(height: 10),
-            Row(children: [
-              if (back != null) ...[
-                Tooltip(
-                  message: 'Voltar',
-                  child: Semantics(
-                    button: true,
-                    label: 'Voltar',
-                    child: InkResponse(
-                      onTap: () => state.go(back!),
-                      radius: 24,
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: const BoxDecoration(color: Color(0x1FFFFFFF), shape: BoxShape.circle),
-                        child: const Icon(LucideIcons.chevronLeft, color: white),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text(profile.name, style: const TextStyle(color: white, fontSize: 17, fontWeight: FontWeight.w700, height: 1.2)),
+                    Text('${profile.role} · ${profile.module}', maxLines: 2, style: const TextStyle(color: Color(0xDDFFFFFF), fontSize: 13, height: 1.3)),
+                  ]),
+                ),
+                TpIconButton(
+                  icon: state.dark ? LucideIcons.sun : LucideIcons.moon,
+                  tooltip: state.dark ? 'Mudar para o tema claro' : 'Mudar para o tema escuro',
+                  color: white,
+                  onTap: state.toggleTheme,
+                ),
+                // Defeito 3: "Trocar perfil" visível em todas as telas.
+                TpIconButton(icon: LucideIcons.arrowLeftRight, tooltip: 'Trocar perfil', color: white, onTap: state.swapProfile),
+                TpIconButton(icon: LucideIcons.bell, tooltip: 'Notificações', color: white, badge: notes[profile.id]!.length, onTap: state.toggleNotes),
+              ]),
+              const SizedBox(height: 10),
+              Row(children: [
+                if (back != null) ...[
+                  Tooltip(
+                    message: 'Voltar',
+                    child: Semantics(
+                      button: true,
+                      label: 'Voltar',
+                      child: InkResponse(
+                        onTap: () => state.go(back!),
+                        radius: 24,
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: const BoxDecoration(color: Color(0x1FFFFFFF), shape: BoxShape.circle),
+                          child: const Icon(LucideIcons.chevronLeft, color: white),
+                        ),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 8),
-              ],
-              Expanded(child: Semantics(header: true, child: Text(screenTitles[state.screen]!, style: TpText.title.copyWith(color: white)))),
+                  const SizedBox(width: 8),
+                ],
+                Expanded(child: Semantics(header: true, child: Text(screenTitles[state.screen]!, style: TpText.title.copyWith(color: white)))),
+              ]),
             ]),
-          ]),
+          ),
         ),
-      ),
+      ]),
     );
   }
 }

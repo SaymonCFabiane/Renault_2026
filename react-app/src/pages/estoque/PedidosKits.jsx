@@ -1,5 +1,5 @@
 import { useDemo } from '../../state/useDemo.js';
-import { kitAvail, kitItems, kitPrio, kitProto, kitStatus } from '../../state/logic.js';
+import { kitAvail, kitItems, kitParcial, kitPrio, kitProto, kitStatus } from '../../state/logic.js';
 import Card from '../../components/Card.jsx';
 import Banner from '../../components/Banner.jsx';
 import Button from '../../components/Button.jsx';
@@ -16,7 +16,7 @@ export default function PedidosKits() {
   return (
     <div className="tp-stack">
       <Banner tone="bad" icon="lock" title="KT-0139 travado">Falta Pinça de freio traseira (BLOCANTE). A coleta só pode ser disparada quando a OP-3308 chegar da MetalSul.</Banner>
-      <Card title="Pedidos de kits do Testes" extra={<span className="tp-cap">Solicitados por Juliana Costa · Testes</span>}>
+      <Card title="Pedidos de kits do Cliente" extra={<span className="tp-cap">Solicitados por Juliana Costa · Cliente</span>}>
         <DataTable compact head={<>
           <th style={{ width: 64 }}>Fila</th>
           <SortTh>Kit</SortTh>
@@ -45,6 +45,7 @@ export default function PedidosKits() {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'flex-start' }}>
                     <span>{items.length} itens · <StatusText>{av}</StatusText></span>
                     {hasB && <Tag tone="blocante" icon="lock">Contém BLOCANTE</Tag>}
+                    {kitParcial(S, k) ? <Tag tone="info">ACEITA PARCIAL</Tag> : <Tag tone="nao">SÓ COMPLETO</Tag>}
                   </div>
                 </td>
                 <td><PrioTag prio={kitPrio(S, k)} /></td>

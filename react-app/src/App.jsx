@@ -9,9 +9,12 @@ import EstoqueDashboard from './pages/estoque/Dashboard.jsx';
 import PedidosKits from './pages/estoque/PedidosKits.jsx';
 import MapeamentoGalpao from './pages/estoque/MapeamentoGalpao.jsx';
 import Rastreabilidade from './pages/estoque/Rastreabilidade.jsx';
-import TestesDashboard from './pages/testes/Dashboard.jsx';
-import NovaRequisicao from './pages/testes/NovaRequisicao.jsx';
-import AcompanhamentoKits from './pages/testes/AcompanhamentoKits.jsx';
+import Qualidade from './pages/estoque/Qualidade.jsx';
+import VisaoSetores from './pages/estoque/VisaoSetores.jsx';
+import Acessos from './pages/estoque/Acessos.jsx';
+import ClienteDashboard from './pages/cliente/Dashboard.jsx';
+import NovaRequisicao from './pages/cliente/NovaRequisicao.jsx';
+import AcompanhamentoKits from './pages/cliente/AcompanhamentoKits.jsx';
 
 // Cada módulo é de um único administrador: a rota define o perfil ativo.
 export default function App() {
@@ -28,12 +31,15 @@ export default function App() {
         <Route index element={<Navigate to="painel" replace />} />
         <Route path="painel" element={<EstoqueDashboard />} />
         <Route path="pedidos" element={<PedidosKits />} />
+        <Route path="qualidade" element={<Qualidade />} />
         <Route path="galpao" element={<MapeamentoGalpao />} />
         <Route path="rastreabilidade" element={<Rastreabilidade />} />
+        <Route path="setores" element={<VisaoSetores />} />
+        <Route path="acessos" element={<Acessos />} />
       </Route>
-      <Route path="/testes" element={<WebShell profile={PROFILES.juliana} />}>
+      <Route path="/cliente" element={<WebShell profile={PROFILES.juliana} />}>
         <Route index element={<Navigate to="painel" replace />} />
-        <Route path="painel" element={<TestesDashboard />} />
+        <Route path="painel" element={<ClienteDashboard />} />
         <Route path="requisicao" element={<NovaRequisicao />} />
         <Route path="acompanhamento" element={<AcompanhamentoKits />} />
       </Route>

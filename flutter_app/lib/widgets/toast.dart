@@ -15,7 +15,7 @@ class ToastView extends StatelessWidget {
     final (Color icBg, Color icFg, IconData ic) = switch (toast.kind) {
       ToastKind.ok => (c.success, c.onStatus, LucideIcons.check),
       ToastKind.bad => (c.danger, c.onStatus, LucideIcons.x),
-      ToastKind.warn => (c.warning, const Color(0xFF1E2F38), LucideIcons.triangleAlert),
+      ToastKind.warn => (c.warning, TpMarca.noite, LucideIcons.triangleAlert),
     };
     return Semantics(
       liveRegion: true,

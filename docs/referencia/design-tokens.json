@@ -1,5 +1,5 @@
 {
-  "name": "TracePro",
+  "name": "TracePro · Renault Geely do Brasil",
   "version": 1,
   "color": {
     "themes": [
@@ -16,120 +16,136 @@
       {
         "name": "primary",
         "value": {
-          "light": "#265267",
-          "dark": "#8DBBD0"
+          "light": "#4713A4",
+          "dark": "#E0D9EC"
         },
-        "usage": "Botão principal, títulos de marca, links e estado ativo. Como texto: sobre surface e content-bg nos dois temas."
+        "usage": "Roxo da marca: botão principal, links, estado ativo. Texto sobre ele: on-primary."
       },
       {
         "name": "on-primary",
         "value": {
-          "light": "#ffffff",
-          "dark": "#10222B"
+          "light": "#FFFFFF",
+          "dark": "#160B3D"
         },
-        "usage": "Texto e ícones sobre preenchimento primary."
+        "usage": "Texto e ícones sobre primary."
       },
       {
         "name": "primary-soft",
         "value": {
-          "light": "#BCD2DD",
-          "dark": "#2C4F60"
+          "light": "#E0D9EC",
+          "dark": "#3A2580"
         },
-        "usage": "Botão secundário, fundo de ícones de dados, segmento ativo. Texto sobre ele: text."
+        "usage": "Lilás claro: botão secundário, fundo de ícones, seleção. Texto sobre ele: text."
       },
       {
         "name": "sidebar",
         "value": {
-          "light": "#265267",
-          "dark": "#2E6078"
+          "light": "#2307AF",
+          "dark": "#2307AF"
         },
-        "usage": "Sidebar web e header mobile. Texto sobre ela: branco."
+        "usage": "Azul-violeta da marca: menu lateral web e cabeçalho mobile (início do degradê). Texto branco."
+      },
+      {
+        "name": "sidebar-fim",
+        "value": {
+          "light": "#4713A4",
+          "dark": "#160B3D"
+        },
+        "usage": "Fim do degradê do menu lateral e do cabeçalho mobile."
       },
       {
         "name": "content-bg",
         "value": {
-          "light": "#C8E1ED",
-          "dark": "#193A4A"
+          "light": "#E7E7E7",
+          "dark": "#160B3D"
         },
-        "usage": "Fundo da área de conteúdo; também o item ativo da sidebar, que se funde com o conteúdo."
+        "usage": "Fundo da área de conteúdo; também o item ativo do menu, que se funde com o conteúdo."
       },
       {
         "name": "surface",
         "value": {
-          "light": "#F6FAFD",
-          "dark": "#121212"
+          "light": "#FFFFFF",
+          "dark": "#21114F"
         },
-        "usage": "Cards, tabelas, header web, modais. A separação vem da cor, não de sombra."
+        "usage": "Cartões, tabelas, cabeçalho web, modais."
       },
       {
         "name": "surface-muted",
         "value": {
-          "light": "#D4E0E7",
-          "dark": "#2A3E48"
+          "light": "#E0D9EC",
+          "dark": "#2E1B6B"
         },
         "usage": "Cabeçalho de tabela, campos, tag NÃO-BLOCANTE, trilhas de progresso."
       },
       {
         "name": "text",
         "value": {
-          "light": "#1E2F38",
-          "dark": "#EEF3F6"
+          "light": "#160B3D",
+          "dark": "#FFFFFF"
         },
         "usage": "Texto principal sobre surface, content-bg e surface-muted."
       },
       {
         "name": "text-secondary",
         "value": {
-          "light": "#5B6B75",
-          "dark": "#A9BAC3"
+          "light": "#5B4E7A",
+          "dark": "#C4B9DE"
         },
-        "usage": "Rótulos e metadados sobre surface (5.4:1). Evite sobre content-bg claro (4.3:1)."
+        "usage": "Rótulos e metadados (tom escuro derivado do #8467AD para ter 4,5:1)."
       },
       {
         "name": "line",
         "value": {
-          "light": "#D4E0E7",
-          "dark": "#2F4450"
+          "light": "#E0D9EC",
+          "dark": "#36236F"
         },
-        "usage": "Divisórias finas entre linhas de tabela e bordas de cards de leitura."
+        "usage": "Divisórias finas e bordas de cartões de leitura."
       },
       {
         "name": "data",
         "value": {
-          "light": "#547C90",
-          "dark": "#6E97AB"
+          "light": "#4B9AF6",
+          "dark": "#4B9AF6"
         },
-        "usage": "Série principal de gráficos, barras e progresso."
+        "usage": "Série principal dos gráficos, barras e progresso."
       },
       {
         "name": "data-light",
         "value": {
-          "light": "#B7CCD6",
-          "dark": "#B7CCD6"
+          "light": "#66D8D0",
+          "dark": "#66D8D0"
         },
-        "usage": "Série secundária, fatia clara da pizza, trilho da linha do tempo."
+        "usage": "Série secundária, fatia clara, trilho da linha do tempo."
+      },
+      {
+        "name": "data-alt",
+        "value": {
+          "light": "#8467AD",
+          "dark": "#8467AD"
+        },
+        "usage": "Terceira série dos gráficos e trecho baixo dos medidores."
       },
       {
         "name": "accent",
         "value": {
-          "light": "#C2703D",
-          "dark": "#D98A57"
+          "light": "#66D8D0",
+          "dark": "#66D8D0"
         },
-        "usage": "Terracota: sublinhado de aba ativa, borda do card de alerta, marcadores e FAB. Como texto só a partir de 18px (3.6:1); para texto menor use accent-text."
+        "usage": "Turquesa da marca: destaque em áreas e bordas (card de alerta, FAB, marcadores). Não use como texto sobre branco."
       },
       {
         "name": "accent-text",
         "value": {
-          "light": "#9E5528",
-          "dark": "#E9A277"
+          "light": "#0B7A72",
+          "dark": "#66D8D0"
         },
-        "usage": "Texto terracota em tamanho normal (aba ativa, status Pendente) sobre surface ou accent-bg."
+        "usage": "Turquesa escurecido para texto e traços finos (aba ativa, status Pendente): 5:1 sobre branco."
       },
       {
         "name": "accent-bg",
         "value": {
-          "light": "#F5DED1",
-          "dark": "#3A2518"
+          "light": "#DDF5F3",
+          "dark": "#0F3A45"
         },
         "usage": "Fundo do card de alerta e da tag de destaque."
       },
@@ -192,8 +208,8 @@
       {
         "name": "on-status",
         "value": {
-          "light": "#ffffff",
-          "dark": "#121212"
+          "light": "#FFFFFF",
+          "dark": "#160B3D"
         },
         "usage": "Texto sobre preenchimentos success, danger e accent (botões)."
       }
@@ -386,7 +402,7 @@
       {
         "name": "shadow-float",
         "value": {
-          "light": "0 16px 40px #0b1a2233",
+          "light": "0 16px 40px #160b3d33",
           "dark": "0 16px 40px #000000b3"
         },
         "usage": "Popover de notificações, modal, toast, drawer."

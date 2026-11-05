@@ -2,7 +2,7 @@
 const SERIES = [
   ['map50', 'Acerto (mAP50)', 'var(--success)'],
   ['map50_95', 'Precisão da caixa (mAP50-95)', 'var(--data)'],
-  ['revocacao', 'Peças encontradas (revocação)', 'var(--accent)'],
+  ['revocacao', 'Peças encontradas (revocação)', 'var(--data-alt)'],
 ];
 
 export default function GraficoMetricas({ historico, epocas }) {

@@ -1,6 +1,6 @@
 # TracePro · App mobile
 
-App dos 3 funcionários do TracePro (demo). É só front-end: dados fictícios fixos e estado em memória. Ao reabrir o app, a demo volta ao início.
+App dos 3 colaboradores do TracePro (demo). É só front-end: dados fictícios fixos e estado em memória. Ao reabrir o app, a demo volta ao início.
 
 ## Como rodar
 
@@ -56,17 +56,18 @@ Fora do Android (`flutter run -d chrome`, testes), o visor continua simulado, co
 | --- | --- | --- |
 | Bruno Lima | Fornecedor | Lotes liberados, Registro e etiquetas, Carregamento |
 | Marcos Souza | Estoque | Fila de tarefas, Conferência de recebimento, Coleta do KT-0142, Expedição de kit |
-| Fernanda Rocha | Testes | Kits esperados, Conferência do kit |
+| Fernanda Rocha | Cliente | Kits esperados, Conferência do kit |
 
 Não há login: a primeira tela é a escolha de perfil. O ícone de setas do header troca de perfil em qualquer tela. Toque no avatar para **Pular para o fim da história**, **Reiniciar demo** ou **Trocar perfil** (as duas primeiras também ficam na tela de perfis). O ícone de lua ou sol alterna o tema.
 
 ## Roteiro da demo
 
 1. **Bruno**: **Simular liberação pelo painel web** → **Registrar e imprimir etiquetas** → **Imprimir Etiquetas**. Em Carregamento, toque 3× em **Simular leitura** (8/10, com 1 leitura repetida em vermelho) e em **Enviar para Aprovação do ADM**.
-2. **Marcos** · Tarefas: **Simular chegada na doca** → **Conferir recebimento**. Toque em **Simular leitura** até ler as 8 peças (uma leitura é inválida) e em **Concluir recebimento**.
-3. **Marcos** · Coleta: siga a rota com **Simular leitura do QR** (o 2º passo tem uma leitura inválida). No Farol LED, toque em **Registrar falta** → **Despachar parcial**. Veja também **Ver exceção: KT-0139** (tela vermelha "Coleta travada").
+2. **Marcos** · Tarefas: **Simular chegada na doca** → **Conferir recebimento**. Toque em **Simular leitura** até ler as 8 peças (uma leitura é inválida). Na **Inspeção de qualidade**, confira peça a peça: **Reprovar** pede motivo e foto; ou use **Simular inspeção** (reprova PC-000203 e PC-000206). Depois, **Concluir recebimento**: as aprovadas vão para o estoque e as reprovadas ficam bloqueadas na Quarentena Q-01 até o Ricardo decidir no painel web (descartar, devolver ou liberar).
+3. **Marcos** · Coleta do KT-0142: as outras peças já vêm coletadas e falta só a **Pinça de freio**. Mostre-a para a câmera (~1 s, com a IA conectada) e o kit fecha como **parcial** (o Farol LED está em falta e o Cliente autorizou). A **Engrenagem** é recusada: "não pertence a este kit". Veja também **Ver exceção: KT-0139** (tela vermelha "Coleta travada").
+3b. **Marcos** · Tarefas → Montagem → KT-0145 → **Coletar com a câmera**: 3 das 5 peças já estão coletadas. Faltam a **Engrenagem** e a **Pinça de freio**, validadas só pela câmera (a peça precisa ficar ~1 s no visor, com a IA conectada). Depois, **Concluir montagem**.
 4. **Marcos** · Expedição: leia a caixa, escolha quem leva e toque em **Confirmar expedição**.
-5. **Fernanda**: toque no aviso **KT-0142 chegou**, leia as peças, use **Reportar Peça Danificada/Incompatível** (com foto) e **Dar Aceite e Liberar para Montagem**.
+5. **Fernanda**: toque no aviso **KT-0142 chegou**. As outras peças já vêm conferidas; falta só a **Pinça de freio**, conferida pela câmera. Se a câmera vir a **Engrenagem**, o app recusa: "Engrenagem não pertence a este kit". Depois, use **Reportar Peça Danificada/Incompatível** (com foto) e **Dar Aceite e Liberar para Montagem**.
 
 ## Estrutura
 

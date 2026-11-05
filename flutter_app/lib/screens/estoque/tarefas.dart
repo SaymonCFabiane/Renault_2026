@@ -25,13 +25,20 @@ class TarefasScreen extends StatelessWidget {
     final sep = <String>[
       if (s.kits['KT-0142'] == 'Em Separação' && !s.k142ready) 'KT-0142',
       'KT-0139',
-      if (s.kits['KT-0145'] == 'Em Separação') 'KT-0145',
+      if (s.kits['KT-0145'] == 'Em Separação' && !s.k145ready) 'KT-0145',
     ];
-    final counts = {'Recebimentos': received ? 0 : 1, 'Montagem de Kits': sep.length, 'Kits para Despacho': ready ? 1 : 0};
+    final counts = {'Recebimentos': received ? 0 : 1, 'Montagem de Kits': sep.length, 'Kits para Despacho': (ready ? 1 : 0) + (s.k145ready ? 1 : 0)};
 
     final List<Widget> body = switch (t) {
       'Recebimentos' => received
-          ? [const EmptyState(icon: LucideIcons.circleCheck, title: 'Nenhum recebimento pendente', text: 'MN-0457 conferida e guardada.')]
+          ? [
+              EmptyState(
+                  icon: LucideIcons.circleCheck,
+                  title: 'Nenhum recebimento pendente',
+                  text: s.recvReprovadas.isEmpty
+                      ? 'MN-0457 conferida e guardada.'
+                      : 'MN-0457 conferida: ${s.recvOkCount - s.recvReprovadas.length} no estoque e ${s.recvReprovadas.length} bloqueadas na quarentena (Zona Q).')
+            ]
           : [
               TpCard(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
@@ -80,33 +87,42 @@ class TarefasScreen extends StatelessWidget {
                     Muted('${kitItemCount[k]} itens', size: 12),
                   ]),
                   const SizedBox(height: 12),
-                  if (k == 'KT-0142')
+                  if (k == 'KT-0142') ...[
+                    const Muted('Falta a Pinça de freio · validação pela câmera', size: 13),
+                    const SizedBox(height: 8),
+                    TpButton(label: 'Coletar com a câmera', icon: LucideIcons.scanEye, block: true, onPressed: () => s.go(Screen.eFunc3)),
+                  ]
+                  else ...[
+                    const Muted('Faltam Engrenagem e Pinça de freio · validação pela câmera', size: 13),
+                    const SizedBox(height: 8),
                     TpButton(
-                        label: s.routeIdx > 0 ? 'Continuar coleta' : 'Iniciar coleta',
-                        icon: LucideIcons.route,
+                        label: 'Coletar com a câmera',
+                        icon: LucideIcons.scanEye,
+                        variant: TpVariant.outline,
                         block: true,
-                        onPressed: () => s.go(Screen.eFunc3))
-                  else
-                    TpButton(
-                      label: 'Iniciar coleta',
-                      icon: LucideIcons.route,
-                      variant: TpVariant.outline,
-                      block: true,
-                      onPressed: () => s.toastOnly(ToastKind.warn, 'Termine o KT-0142 antes: ele tem prioridade Alta.'),
-                    ),
+                        onPressed: () => s.go(Screen.eFunc5)),
+                  ],
                 ]),
               ),
         ],
-      _ => ready
+      _ => ready || s.k145ready
           ? [
-              TpCard(
-                child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                  const CardHeadRow(title: 'KT-0142', trailing: TpTag('PARCIAL', tone: TagTone.warn)),
-                  const Muted('$protoSuv · 5 de 6 itens'),
-                  const SizedBox(height: 12),
-                  TpButton(label: 'Expedir kit', icon: LucideIcons.truck, block: true, onPressed: () => s.go(Screen.eFunc4)),
-                ]),
-              ),
+              if (s.k145ready)
+                const TpCard(
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                    CardHeadRow(title: 'KT-0145', trailing: TpTag('COMPLETO', tone: TagTone.ok)),
+                    Muted('$protoHatch · 5 de 5 itens · aguardando expedição'),
+                  ]),
+                ),
+              if (ready)
+                TpCard(
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                    const CardHeadRow(title: 'KT-0142', trailing: TpTag('PARCIAL', tone: TagTone.warn)),
+                    const Muted('$protoSuv · 5 de 6 itens'),
+                    const SizedBox(height: 12),
+                    TpButton(label: 'Expedir kit', icon: LucideIcons.truck, block: true, onPressed: () => s.go(Screen.eFunc4)),
+                  ]),
+                ),
             ]
           : [const EmptyState(icon: LucideIcons.truck, title: 'Nenhum kit pronto para despacho', text: 'Os kits aparecem aqui quando a coleta termina.')],
     };

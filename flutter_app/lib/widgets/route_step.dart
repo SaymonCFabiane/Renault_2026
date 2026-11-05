@@ -15,7 +15,7 @@ class RouteStepCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = TpColors.of(context);
-    final fg = warning ? const Color(0xFF1E2F38) : c.onPrimary;
+    final fg = warning ? TpMarca.noite : c.onPrimary;
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(color: warning ? c.warning : c.primary, borderRadius: BorderRadius.circular(TpRadius.radiusCard)),

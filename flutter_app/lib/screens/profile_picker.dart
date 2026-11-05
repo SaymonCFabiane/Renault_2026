@@ -9,6 +9,7 @@ import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 import '../widgets/buttons.dart';
 import '../widgets/cards.dart';
+import '../widgets/facetas.dart';
 import '../widgets/tags.dart';
 import '../widgets/toast.dart';
 
@@ -27,35 +28,39 @@ class ProfilePicker extends StatelessWidget {
         Column(children: [
           Container(
             width: double.infinity,
-            decoration: BoxDecoration(color: c.sidebar, borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24))),
-            child: SafeArea(
-              bottom: false,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 10, 8, 26),
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Row(children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(color: const Color(0x26FFFFFF), borderRadius: BorderRadius.circular(TpRadius.radiusIcon)),
-                      child: const Icon(LucideIcons.route, color: white),
-                    ),
-                    const SizedBox(width: 10),
-                    const Expanded(child: Text('TracePro', style: TextStyle(color: white, fontSize: 24, fontWeight: FontWeight.w800))),
-                    TpIconButton(
-                      icon: s.dark ? LucideIcons.sun : LucideIcons.moon,
-                      tooltip: s.dark ? 'Mudar para o tema claro' : 'Mudar para o tema escuro',
-                      color: white,
-                      onTap: s.toggleTheme,
-                    ),
+            clipBehavior: Clip.antiAlias,
+            decoration: BoxDecoration(gradient: c.degradeMarca, borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24))),
+            child: Stack(children: [
+              const Positioned.fill(child: FacetasMarca()),
+              SafeArea(
+                bottom: false,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 10, 8, 26),
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Row(children: [
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(color: const Color(0x26FFFFFF), borderRadius: BorderRadius.circular(TpRadius.radiusIcon)),
+                        child: const Icon(LucideIcons.route, color: white),
+                      ),
+                      const SizedBox(width: 10),
+                      const Expanded(child: Text('TracePro', style: TextStyle(color: white, fontSize: 24, fontWeight: FontWeight.w800))),
+                      TpIconButton(
+                        icon: s.dark ? LucideIcons.sun : LucideIcons.moon,
+                        tooltip: s.dark ? 'Mudar para o tema claro' : 'Mudar para o tema escuro',
+                        color: white,
+                        onTap: s.toggleTheme,
+                      ),
+                    ]),
+                    const SizedBox(height: 14),
+                    Semantics(header: true, child: Text('Quem vai trabalhar agora?', style: TpText.title.copyWith(color: white))),
+                    const SizedBox(height: 2),
+                    const Text('Toque no seu perfil para entrar', style: TextStyle(color: Color(0xDDFFFFFF), fontSize: 14)),
                   ]),
-                  const SizedBox(height: 14),
-                  Semantics(header: true, child: Text('Quem vai trabalhar agora?', style: TpText.title.copyWith(color: white))),
-                  const SizedBox(height: 2),
-                  const Text('Toque no seu perfil para entrar', style: TextStyle(color: Color(0xDDFFFFFF), fontSize: 14)),
-                ]),
+                ),
               ),
-            ),
+            ]),
           ),
           Expanded(
             child: ListView(

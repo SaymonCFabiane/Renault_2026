@@ -12,15 +12,15 @@ export default function ProfilePicker() {
   const { act } = useDemo();
   useEffect(() => { document.title = 'TracePro · Escolha um perfil'; }, []);
   return (
-    <div className="tp" style={{ minHeight: '100vh', background: 'var(--content-bg)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 36, padding: 40, position: 'relative' }}>
+    <div className="tp tp-marca" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 36, padding: 40, position: 'relative' }}>
       <div style={{ position: 'absolute', top: 20, right: 24 }}><ThemeToggle /></div>
       <div style={{ textAlign: 'center' }}>
         <div className="tp-row" style={{ justifyContent: 'center', gap: 10, marginBottom: 10 }}>
-          <span className="tp-iconbox" style={{ background: 'var(--primary)', color: 'var(--on-primary)', borderColor: 'transparent' }}><Icon name="route" /></span>
-          <span style={{ fontSize: 32, fontWeight: 800, color: 'var(--primary)' }}>TracePro</span>
+          <span className="tp-iconbox" style={{ background: '#ffffff26', color: '#fff', borderColor: 'transparent' }}><Icon name="route" /></span>
+          <span style={{ fontSize: 32, fontWeight: 800, color: '#fff' }}>TracePro</span>
         </div>
-        <h1 className="tp-h1">Escolha um perfil para entrar</h1>
-        <p className="tp-muted" style={{ margin: '6px 0 0' }}>Painel web dos administradores · Fornecedor → Estoque → Testes</p>
+        <h1 className="tp-h1" style={{ color: '#fff' }}>Escolha um perfil para entrar</h1>
+        <p style={{ margin: '6px 0 0', color: '#E0D9EC' }}>Painel web dos administradores · Fornecedor → Estoque → Cliente</p>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 320px)', gap: 24 }}>
         {Object.values(PROFILES).map((p) => (

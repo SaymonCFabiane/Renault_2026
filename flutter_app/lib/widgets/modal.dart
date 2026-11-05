@@ -4,11 +4,10 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../data/mock_data.dart';
 import '../state/demo_state.dart';
 import '../theme/tokens.dart';
-import 'banner.dart';
 import 'buttons.dart';
 import 'cards.dart';
 
-/// Camada de modal (impressão, kit parcial, relato de peça). Fica acima do toast.
+/// Camada de modal (impressão, relato de peça). Fica acima do toast.
 class ModalLayer extends StatelessWidget {
   const ModalLayer({super.key, required this.state});
   final DemoState state;
@@ -18,12 +17,11 @@ class ModalLayer extends StatelessWidget {
     final c = TpColors.of(context);
     final body = switch (state.modal!) {
       ModalKind.print => _print(context, c),
-      ModalKind.partial => _partial(context, c),
       ModalKind.report => _report(context, c),
     };
     return Positioned.fill(
       child: ColoredBox(
-        color: const Color(0x660B1A22),
+        color: const Color(0x80160B3D),
         child: SafeArea(
           child: Center(
             child: SingleChildScrollView(
@@ -65,24 +63,6 @@ class ModalLayer extends StatelessWidget {
       if (done) ...[_gap, TpButton(label: 'Concluir', block: true, onPressed: state.closeModal)],
     ];
   }
-
-  List<Widget> _partial(BuildContext context, TpColors c) => [
-        _icon(c.warningBg, c.warningText, LucideIcons.circleAlert),
-        _gap,
-        const Text('Despachar Kit Parcial?', style: _h2),
-        _gap,
-        const TpBanner(
-            tone: BannerTone.warn,
-            icon: LucideIcons.triangleAlert,
-            title: 'Farol LED esquerdo em falta',
-            body: 'Peça NÃO-BLOCANTE. Juliana Costa autorizou envio parcial no pedido.'),
-        _gap,
-        const Muted('Os 5 itens coletados seguem agora. O farol vai depois, pela reposição OP-3310.'),
-        _gap,
-        TpButton(label: 'Despachar parcial', icon: LucideIcons.truck, block: true, onPressed: state.partialYes),
-        const SizedBox(height: 8),
-        TpButton(label: 'Aguardar a peça', variant: TpVariant.ghost, block: true, onPressed: state.partialNo),
-      ];
 
   List<Widget> _report(BuildContext context, TpColors c) => [
         Row(children: [
@@ -183,8 +163,7 @@ class PhotoThumb extends StatelessWidget {
           height: 84,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(TpRadius.radiusIcon),
-            gradient:
-                const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF8AA8B6), Color(0xFF547C90), Color(0xFF3B5A69)]),
+            gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [TpMarca.lilas, TpMarca.roxo, TpMarca.azulVioleta]),
           ),
           child: const Icon(LucideIcons.image, color: Colors.white),
         ),

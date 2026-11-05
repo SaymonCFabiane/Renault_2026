@@ -4,35 +4,46 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../data/mock_data.dart';
 import '../theme/tokens.dart';
 
-/// Linha do histórico de leituras: verde (OK) ou vermelha (inválida).
+/// Linha do histórico de leituras: verde (OK), vermelha (inválida) ou amarela
+/// (lida, mas bloqueada pela inspeção de qualidade; [bloqueada] traz o motivo e o endereço é o da quarentena).
 class ReadRow extends StatelessWidget {
-  const ReadRow(this.read, {super.key});
+  const ReadRow(this.read, {super.key, this.bloqueada});
   final ScanRead read;
+  final String? bloqueada;
 
   @override
   Widget build(BuildContext context) {
     final c = TpColors.of(context);
-    final ok = read.ok;
+    final ok = read.ok, blq = ok && bloqueada != null;
+    final (Color fundo, Color borda, Color bola, IconData icone, Color cor) = blq
+        ? (c.surface, c.warning, c.warningBg, LucideIcons.shieldAlert, c.warningText)
+        : ok
+            ? (c.surface, c.line, c.successBg, LucideIcons.check, c.success)
+            : (c.dangerBg, c.danger, c.danger, LucideIcons.x, c.onStatus);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: ok ? c.surface : c.dangerBg,
+        color: fundo,
         borderRadius: BorderRadius.circular(TpRadius.radiusIcon),
-        border: Border.all(color: ok ? c.line : c.danger, width: 1.5),
+        border: Border.all(color: borda, width: 1.5),
       ),
       child: Row(children: [
         Container(
           width: 32,
           height: 32,
-          decoration: BoxDecoration(color: ok ? c.successBg : c.danger, shape: BoxShape.circle),
-          child: Icon(ok ? LucideIcons.check : LucideIcons.x, size: 18, color: ok ? c.success : c.onStatus),
+          decoration: BoxDecoration(color: bola, shape: BoxShape.circle),
+          child: Icon(icone, size: 18, color: cor),
         ),
         const SizedBox(width: 12),
         Expanded(
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(read.code, style: const TextStyle(fontWeight: FontWeight.w800, fontFeatures: [FontFeature.tabularFigures()])),
-            Text(ok ? (read.sub ?? 'Leitura OK') : read.msg!,
-                style: TextStyle(fontSize: 13, height: 1.3, color: ok ? c.textSecondary : c.danger, fontWeight: ok ? FontWeight.w400 : FontWeight.w700)),
+            Text(blq ? 'Bloqueada · $bloqueada · $quarentena' : ok ? (read.sub ?? 'Leitura OK') : read.msg!,
+                style: TextStyle(
+                    fontSize: 13,
+                    height: 1.3,
+                    color: blq ? c.warningText : ok ? c.textSecondary : c.danger,
+                    fontWeight: ok && !blq ? FontWeight.w400 : FontWeight.w700)),
           ]),
         ),
         const SizedBox(width: 8),

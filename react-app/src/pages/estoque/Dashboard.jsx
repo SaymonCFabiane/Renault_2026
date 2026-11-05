@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { PATHS, PROTOS } from '../../data/mock.js';
 import { useDemo } from '../../state/useDemo.js';
+import { bloqueadas, lotesQualidade, qtdPecas } from '../../state/logic.js';
 import Card, { Col } from '../../components/Card.jsx';
 import Button from '../../components/Button.jsx';
 import CriticalityTag, { PrioTag } from '../../components/CriticalityTag.jsx';
@@ -29,15 +30,30 @@ function CriticalKit({ tone, title, locked, proto, part, blocante, note }) {
 export default function Dashboard() {
   const { S } = useDemo();
   const navigate = useNavigate();
-  const farol = S.mn0457 === 'Recebido' ? 7 : 0;
+  // 8 recebidos − 2 bloqueados pela qualidade − 1 reservado para o KT-0142
+  const farol = S.mn0457 === 'Recebido' ? 5 : 0;
+  const bloq = bloqueadas(S);
+  const remessasBloq = [...new Set(bloq.map((p) => p.remessa))];
   const alerts = [['Pinça de freio traseira', 0, 4, true], ['Farol LED esquerdo', farol, 2, false], ['Amortecedor traseiro', 3, 6, false], ['Módulo de ECU', 2, 3, true], ['Sensor de estacionamento', 5, 8, false]];
   return (
     <div className="tp-grid">
+      {bloq.length > 0 && (
+        <Col span={12}>
+          <div className="tp-banner tp-banner--warn" style={{ alignItems: 'center' }}>
+            <Icon name="shield-alert" />
+            <div style={{ flex: 1 }}>
+              <b>{bloq.length === 1 ? '1 peça bloqueada' : `${bloq.length} peças bloqueadas`} pela qualidade aguardando a sua decisão</b>
+              <p>{remessasBloq.map((r) => `${r}: ${qtdPecas(bloq.filter((p) => p.remessa === r).length, lotesQualidade(S).find((l) => l.remessa === r)?.peca ?? '')}`).join(' · ')}. Elas não entram em kits até você descartar, devolver ou liberar.</p>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => navigate(PATHS['E-ADM5'])}>Ver bloqueios</Button>
+          </div>
+        </Col>
+      )}
       <Col span={8}>
-        <Card title="Nível de estoque" extra={<Legend items={[['var(--data)', 'Peças totais'], ['var(--accent)', 'Reservadas para kits']]} />}>
+        <Card title="Nível de estoque" extra={<Legend items={[['var(--data)', 'Peças totais'], ['var(--data-alt)', 'Reservadas para kits']]} />}>
           <LineChart w={720} h={260} label="Nível de estoque de abril a setembro" labels={['Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set']} max={2500} ticks={[0, 500, 1000, 1500, 2000, 2500]} fmt={(v) => v.toLocaleString('pt-BR')} vgrid
-            series={[{ vals: [1840, 1910, 1780, 2050, 1990, 2120], color: 'var(--data)', fill: true, dots: true }, { vals: [420, 510, 460, 630, 580, 700], color: 'var(--accent)', dots: true }]}
-            marks={[{ i: 5, s: 1, label: '700 reservadas', color: 'var(--accent-text)' }]} />
+            series={[{ vals: [1840, 1910, 1780, 2050, 1990, 2120], color: 'var(--data)', fill: true, dots: true }, { vals: [420, 510, 460, 630, 580, 700], color: 'var(--data-alt)', dots: true }]}
+            marks={[{ i: 5, s: 1, label: '700 reservadas', color: 'var(--data-alt)' }]} />
         </Card>
       </Col>
       <Col span={4}>
@@ -51,7 +67,7 @@ export default function Dashboard() {
       </Col>
       <Col span={3}>
         <Card title="Tempo médio de montagem">
-          <Gauge value={42} max={60} unit=" min" split={0.75} c1="var(--success)" c2="var(--accent)" label="Meta: até 45 min por kit" />
+          <Gauge value={42} max={60} unit=" min" split={0.75} c1="var(--success)" c2="var(--data-alt)" label="Meta: até 45 min por kit" />
         </Card>
       </Col>
       <Col span={3}>

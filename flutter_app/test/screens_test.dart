@@ -6,7 +6,7 @@ import 'package:flutter_app/state/demo_state.dart';
 
 import 'helpers.dart';
 
-/// Renderiza as 9 telas e a seleção de perfil a 390×844, nos dois temas e em três
+/// Renderiza as 10 telas e a seleção de perfil a 390×844, nos dois temas e em três
 /// momentos da história. Qualquer overflow (faixa amarelo-e-preto) faz o teste falhar.
 void main() {
   setUpAll(loadFonts);
@@ -19,6 +19,7 @@ void main() {
     Screen.eFunc2: 'marcos',
     Screen.eFunc3: 'marcos',
     Screen.eFunc4: 'marcos',
+    Screen.eFunc5: 'marcos',
     Screen.tFunc1: 'fernanda',
     Screen.tFunc2: 'fernanda',
   };
@@ -30,7 +31,6 @@ void main() {
         final s = DemoState()..dark = dark;
         if (moment == 'meio') {
           s.advance('shipped');
-          s.routeIdx = 2;
         }
         if (moment == 'fim') s.advance('accepted');
         await tester.pumpWidget(TraceProApp(state: s));

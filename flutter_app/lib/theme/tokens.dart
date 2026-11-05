@@ -1,4 +1,4 @@
-// Gerado a partir de docs/referencia/design-tokens.json (tema claro e escuro).
+// Gerado a partir de docs/referencia/design-tokens.json (paleta Renault Geely do Brasil, tema claro e escuro).
 import 'package:flutter/material.dart';
 
 /// Cores semânticas do TracePro, disponíveis em `TpColors.of(context)`.
@@ -9,6 +9,7 @@ class TpColors extends ThemeExtension<TpColors> {
     required this.onPrimary,
     required this.primarySoft,
     required this.sidebar,
+    required this.sidebarFim,
     required this.contentBg,
     required this.surface,
     required this.surfaceMuted,
@@ -17,6 +18,7 @@ class TpColors extends ThemeExtension<TpColors> {
     required this.line,
     required this.data,
     required this.dataLight,
+    required this.dataAlt,
     required this.accent,
     required this.accentText,
     required this.accentBg,
@@ -34,6 +36,7 @@ class TpColors extends ThemeExtension<TpColors> {
   final Color onPrimary;
   final Color primarySoft;
   final Color sidebar;
+  final Color sidebarFim;
   final Color contentBg;
   final Color surface;
   final Color surfaceMuted;
@@ -42,6 +45,7 @@ class TpColors extends ThemeExtension<TpColors> {
   final Color line;
   final Color data;
   final Color dataLight;
+  final Color dataAlt;
   final Color accent;
   final Color accentText;
   final Color accentBg;
@@ -55,21 +59,23 @@ class TpColors extends ThemeExtension<TpColors> {
   final Color onStatus;
 
   static const light = TpColors(
-    primary: Color(0xFF265267),
+    primary: Color(0xFF4713A4),
     onPrimary: Color(0xFFFFFFFF),
-    primarySoft: Color(0xFFBCD2DD),
-    sidebar: Color(0xFF265267),
-    contentBg: Color(0xFFC8E1ED),
-    surface: Color(0xFFF6FAFD),
-    surfaceMuted: Color(0xFFD4E0E7),
-    text: Color(0xFF1E2F38),
-    textSecondary: Color(0xFF5B6B75),
-    line: Color(0xFFD4E0E7),
-    data: Color(0xFF547C90),
-    dataLight: Color(0xFFB7CCD6),
-    accent: Color(0xFFC2703D),
-    accentText: Color(0xFF9E5528),
-    accentBg: Color(0xFFF5DED1),
+    primarySoft: Color(0xFFE0D9EC),
+    sidebar: Color(0xFF2307AF),
+    sidebarFim: Color(0xFF4713A4),
+    contentBg: Color(0xFFE7E7E7),
+    surface: Color(0xFFFFFFFF),
+    surfaceMuted: Color(0xFFE0D9EC),
+    text: Color(0xFF160B3D),
+    textSecondary: Color(0xFF5B4E7A),
+    line: Color(0xFFE0D9EC),
+    data: Color(0xFF4B9AF6),
+    dataLight: Color(0xFF66D8D0),
+    dataAlt: Color(0xFF8467AD),
+    accent: Color(0xFF66D8D0),
+    accentText: Color(0xFF0B7A72),
+    accentBg: Color(0xFFDDF5F3),
     success: Color(0xFF2F7A5B),
     successBg: Color(0xFFE3F5EE),
     warning: Color(0xFFE0A526),
@@ -81,21 +87,23 @@ class TpColors extends ThemeExtension<TpColors> {
   );
 
   static const dark = TpColors(
-    primary: Color(0xFF8DBBD0),
-    onPrimary: Color(0xFF10222B),
-    primarySoft: Color(0xFF2C4F60),
-    sidebar: Color(0xFF2E6078),
-    contentBg: Color(0xFF193A4A),
-    surface: Color(0xFF121212),
-    surfaceMuted: Color(0xFF2A3E48),
-    text: Color(0xFFEEF3F6),
-    textSecondary: Color(0xFFA9BAC3),
-    line: Color(0xFF2F4450),
-    data: Color(0xFF6E97AB),
-    dataLight: Color(0xFFB7CCD6),
-    accent: Color(0xFFD98A57),
-    accentText: Color(0xFFE9A277),
-    accentBg: Color(0xFF3A2518),
+    primary: Color(0xFFE0D9EC),
+    onPrimary: Color(0xFF160B3D),
+    primarySoft: Color(0xFF3A2580),
+    sidebar: Color(0xFF2307AF),
+    sidebarFim: Color(0xFF160B3D),
+    contentBg: Color(0xFF160B3D),
+    surface: Color(0xFF21114F),
+    surfaceMuted: Color(0xFF2E1B6B),
+    text: Color(0xFFFFFFFF),
+    textSecondary: Color(0xFFC4B9DE),
+    line: Color(0xFF36236F),
+    data: Color(0xFF4B9AF6),
+    dataLight: Color(0xFF66D8D0),
+    dataAlt: Color(0xFF8467AD),
+    accent: Color(0xFF66D8D0),
+    accentText: Color(0xFF66D8D0),
+    accentBg: Color(0xFF0F3A45),
     success: Color(0xFF5CC096),
     successBg: Color(0xFF15302A),
     warning: Color(0xFFE0A526),
@@ -103,10 +111,13 @@ class TpColors extends ThemeExtension<TpColors> {
     warningBg: Color(0xFF3A2E10),
     danger: Color(0xFFEF6B5D),
     dangerBg: Color(0xFF3D1A16),
-    onStatus: Color(0xFF121212),
+    onStatus: Color(0xFF160B3D),
   );
 
   static TpColors of(BuildContext context) => Theme.of(context).extension<TpColors>()!;
+
+  /// Degradê da marca (menu lateral / cabeçalho): sidebar → sidebar-fim.
+  LinearGradient get degradeMarca => LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [sidebar, sidebarFim]);
 
   @override
   TpColors copyWith(
@@ -114,6 +125,7 @@ class TpColors extends ThemeExtension<TpColors> {
       Color? onPrimary,
       Color? primarySoft,
       Color? sidebar,
+      Color? sidebarFim,
       Color? contentBg,
       Color? surface,
       Color? surfaceMuted,
@@ -122,6 +134,7 @@ class TpColors extends ThemeExtension<TpColors> {
       Color? line,
       Color? data,
       Color? dataLight,
+      Color? dataAlt,
       Color? accent,
       Color? accentText,
       Color? accentBg,
@@ -138,6 +151,7 @@ class TpColors extends ThemeExtension<TpColors> {
       onPrimary: onPrimary ?? this.onPrimary,
       primarySoft: primarySoft ?? this.primarySoft,
       sidebar: sidebar ?? this.sidebar,
+      sidebarFim: sidebarFim ?? this.sidebarFim,
       contentBg: contentBg ?? this.contentBg,
       surface: surface ?? this.surface,
       surfaceMuted: surfaceMuted ?? this.surfaceMuted,
@@ -146,6 +160,7 @@ class TpColors extends ThemeExtension<TpColors> {
       line: line ?? this.line,
       data: data ?? this.data,
       dataLight: dataLight ?? this.dataLight,
+      dataAlt: dataAlt ?? this.dataAlt,
       accent: accent ?? this.accent,
       accentText: accentText ?? this.accentText,
       accentBg: accentBg ?? this.accentBg,
@@ -168,6 +183,7 @@ class TpColors extends ThemeExtension<TpColors> {
       onPrimary: Color.lerp(onPrimary, other.onPrimary, t)!,
       primarySoft: Color.lerp(primarySoft, other.primarySoft, t)!,
       sidebar: Color.lerp(sidebar, other.sidebar, t)!,
+      sidebarFim: Color.lerp(sidebarFim, other.sidebarFim, t)!,
       contentBg: Color.lerp(contentBg, other.contentBg, t)!,
       surface: Color.lerp(surface, other.surface, t)!,
       surfaceMuted: Color.lerp(surfaceMuted, other.surfaceMuted, t)!,
@@ -176,6 +192,7 @@ class TpColors extends ThemeExtension<TpColors> {
       line: Color.lerp(line, other.line, t)!,
       data: Color.lerp(data, other.data, t)!,
       dataLight: Color.lerp(dataLight, other.dataLight, t)!,
+      dataAlt: Color.lerp(dataAlt, other.dataAlt, t)!,
       accent: Color.lerp(accent, other.accent, t)!,
       accentText: Color.lerp(accentText, other.accentText, t)!,
       accentBg: Color.lerp(accentBg, other.accentBg, t)!,
@@ -189,6 +206,18 @@ class TpColors extends ThemeExtension<TpColors> {
       onStatus: Color.lerp(onStatus, other.onStatus, t)!,
     );
   }
+}
+
+/// Paleta institucional (para ilustrações e fundos que não mudam com o tema).
+abstract final class TpMarca {
+  static const roxo = Color(0xFF4713A4);
+  static const azulVioleta = Color(0xFF2307AF);
+  static const lilas = Color(0xFF8467AD);
+  static const noite = Color(0xFF160B3D);
+  static const turquesa = Color(0xFF66D8D0);
+  static const azul = Color(0xFF4B9AF6);
+  static const lavanda = Color(0xFFE0D9EC);
+  static const cinza = Color(0xFFE7E7E7);
 }
 
 /// Espaçamento (base de 4px).

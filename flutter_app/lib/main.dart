@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'data/mock_data.dart';
 import 'ia/ia_servico.dart';
 import 'screens/estoque/coleta.dart';
+import 'screens/estoque/coleta_ia.dart';
 import 'screens/estoque/expedicao.dart';
 import 'screens/estoque/recebimento.dart';
 import 'screens/estoque/tarefas.dart';
@@ -12,8 +13,8 @@ import 'screens/fornecedor/carregamento.dart';
 import 'screens/fornecedor/etiquetas.dart';
 import 'screens/fornecedor/lotes.dart';
 import 'screens/profile_picker.dart';
-import 'screens/testes/conferencia_kit.dart';
-import 'screens/testes/kits_esperados.dart';
+import 'screens/cliente/conferencia_kit.dart';
+import 'screens/cliente/kits_esperados.dart';
 import 'state/demo_state.dart';
 import 'theme/app_theme.dart';
 import 'widgets/mobile_shell.dart';
@@ -29,7 +30,7 @@ Future<void> main() async {
   runApp(TraceProApp(state: DemoState(), ia: ia));
 }
 
-/// App mobile dos funcionários (Bruno, Marcos e Fernanda). Estado da demo só em memória.
+/// App mobile dos colaboradores (Bruno, Marcos e Fernanda). Estado da demo só em memória.
 class TraceProApp extends StatelessWidget {
   const TraceProApp({super.key, required this.state, this.ia});
   final DemoState state;
@@ -76,6 +77,7 @@ class _Root extends StatelessWidget {
       Screen.eFunc1 => const TarefasScreen(),
       Screen.eFunc2 => const RecebimentoScreen(),
       Screen.eFunc3 => const ColetaScreen(),
+      Screen.eFunc5 => const ColetaIaScreen(),
       Screen.eFunc4 => const ExpedicaoScreen(),
       Screen.tFunc1 => const KitsEsperadosScreen(),
       Screen.tFunc2 => const ConferenciaKitScreen(),

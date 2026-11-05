@@ -6,12 +6,14 @@ import Button from '../../components/Button.jsx';
 import DataTable, { SortTh } from '../../components/DataTable.jsx';
 import StatusText from '../../components/StatusText.jsx';
 import Icon from '../../components/Icon.jsx';
+import { useLeitura } from '../../state/somenteLeitura.js';
 
 const ALL = Array.from({ length: 10 }, (_, i) => 'PC-0002' + String(i + 1).padStart(2, '0'));
 
 // F-ADM3 · Validação e Liberação de Carga (MN-0457)
 export default function ValidacaoCarga() {
   const { S, act } = useDemo();
+  const leitura = useLeitura();
   const ok = loadOk(S);
   const dup = S.load.reads.filter((r) => !r.ok);
   const s = S.mn0457, pending = s === 'Em Conferência', approved = s === 'Em Trânsito' || s === 'Recebido';
@@ -25,7 +27,7 @@ export default function ValidacaoCarga() {
               <Icon name="scan-barcode" />
               <div><b>Conferência em andamento no app</b>
                 <p>Bruno Lima bipou {ok.length} de 10 peças. A expedição fica bloqueada até ele enviar a conferência.{' '}
-                  <button type="button" className="tp-link" onClick={() => act('simSend')}>Simular envio do operador</button></p>
+                  {!leitura && <button type="button" className="tp-link" onClick={() => act('simSend')}>Simular envio do operador</button>}</p>
               </div>
             </div>
           )}

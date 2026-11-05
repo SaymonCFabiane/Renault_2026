@@ -1,6 +1,6 @@
 import { KANBAN_COLS } from '../../data/mock.js';
 import { useDemo } from '../../state/useDemo.js';
-import { allKits, kitItems, kitPrio, kitProto, kitStatus } from '../../state/logic.js';
+import { allKits, kitItems, kitParcial, kitPrio, kitProto, kitStatus } from '../../state/logic.js';
 import Card from '../../components/Card.jsx';
 import Banner from '../../components/Banner.jsx';
 import CriticalityTag, { PrioTag, Tag } from '../../components/CriticalityTag.jsx';
@@ -15,7 +15,7 @@ function KitDrawer({ S, act }) {
     <Drawer label={`Detalhes do ${k}`} onClose={() => act('closeDrawer')} head={<>
       <div className="tp-h2">{k}</div>
       <div className="tp-cap">{kitProto(S, k)}</div>
-      <div className="tp-row" style={{ gap: 8, marginTop: 8 }}><PrioTag prio={kitPrio(S, k)} /><StatusText>{kitStatus(S, k)}</StatusText></div>
+      <div className="tp-row" style={{ gap: 8, marginTop: 8 }}><PrioTag prio={kitPrio(S, k)} />{kitParcial(S, k) ? <Tag tone="info">ACEITA PARCIAL</Tag> : <Tag tone="nao">SÓ COMPLETO</Tag>}<StatusText>{kitStatus(S, k)}</StatusText></div>
     </>}>
       {k === 'KT-0142' && (
         <Banner tone="warn" icon="circle-alert" title="Peça pendente: Farol LED esquerdo">

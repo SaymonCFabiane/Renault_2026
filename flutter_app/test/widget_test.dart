@@ -7,7 +7,7 @@ import 'helpers.dart';
 void main() {
   setUpAll(loadFonts);
 
-  testWidgets('Seleção de perfil mostra os 3 funcionários e abre Lotes liberados', (tester) async {
+  testWidgets('Seleção de perfil mostra os 3 colaboradores e abre Lotes liberados', (tester) async {
     usePhone(tester);
     await tester.pumpWidget(TraceProApp(state: DemoState()));
     expect(find.text('Bruno Lima'), findsOneWidget);

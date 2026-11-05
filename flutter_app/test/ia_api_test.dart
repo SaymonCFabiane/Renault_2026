@@ -31,7 +31,7 @@ void main() {
     if (!noAr) return markTestSkipped('API não está rodando em localhost:8000');
     final (ok, msg) = await IaServico.testarConexao(_cfg);
     expect(ok, isTrue, reason: msg);
-    expect(msg, contains('yolo11n.pt'));
+    expect(msg, contains('Conectado: modelo'));
   });
 
   test('quadro do app → detecções da API (protocolo dos dois lados)', () async {
@@ -46,7 +46,9 @@ void main() {
     expect(r, isA<RespostaDeteccoes>());
     final d = r! as RespostaDeteccoes;
     expect((d.seq, d.capturadoEm), (7, inicio.toDouble()));
-    expect(d.deteccoes.map((x) => x.classe), containsAll(['person', 'bus']));
+    // bus.jpg só tem classes do COCO: confere as classes com o modelo base; com um modelo treinado, só o protocolo.
+    final status = jsonDecode(await (await HttpClient().getUrl(Uri.parse('http://127.0.0.1:8000/status'))).close().then((r) => r.transform(utf8.decoder).join()));
+    if (status['modelo'] == 'yolo11n.pt') expect(d.deteccoes.map((x) => x.classe), containsAll(['person', 'bus']));
     for (final x in d.deteccoes) {
       expect(x.caixa.left >= 0 && x.caixa.right <= 1 && x.caixa.top >= 0 && x.caixa.bottom <= 1, isTrue);
     }

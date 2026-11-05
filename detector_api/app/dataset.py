@@ -26,8 +26,8 @@ LADO_MINIATURA = 320
 STATUS = ("pendente", "sugerida", "revisada", "descartada")
 DIVISOES = ("treino", "validacao")
 EXTENSOES = {".jpg", ".jpeg", ".png", ".webp", ".bmp"}
-# Cores das classes no painel (contraste bom sobre foto, nos dois temas).
-CORES = ["#FFB27A", "#7FD4FF", "#B6F09C", "#F0A3FF", "#FFE070", "#FF8F8F", "#9EA8FF", "#7FFFD4"]
+# Cores das classes no painel, da paleta Renault Geely do Brasil (contraste bom sobre foto).
+CORES = ["#66D8D0", "#4B9AF6", "#E0D9EC", "#8467AD", "#FFFFFF", "#B6F09C", "#FFE070", "#FF8F8F"]
 
 _ESQUEMA = """
 CREATE TABLE IF NOT EXISTS classes (

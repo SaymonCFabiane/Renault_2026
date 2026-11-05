@@ -3,6 +3,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../data/mock_data.dart';
 import '../../state/demo_state.dart';
+import '../../widgets/aviso_ia.dart';
 import '../../widgets/banner.dart';
 import '../../widgets/buttons.dart';
 import '../../widgets/cards.dart';
@@ -38,9 +39,8 @@ class ConferenciaKitScreen extends StatelessWidget {
             title: 'Kit aceito e liberado para montagem',
             body: 'Juliana Costa vê o KT-0142 como Entregue Parcial.')
       else ...[
-        ScannerView(last: s.accLast, idle: 'Leia o QR de cada peça'),
-        if (s.accSeqIdx < accSeq.length)
-          TpButton(label: 'Simular leitura', icon: LucideIcons.scanLine, variant: TpVariant.secondary, block: true, onPressed: s.accScan),
+        if (!allIn) const AvisoCameraIa(pecas: 'a Pinça de freio'),
+        ScannerView(last: s.accLast, idle: allIn ? 'Todas as peças conferidas' : 'Mostre a peça para a câmera', onPeca: s.conferirPorIa),
       ],
       const SectionTitle('Pedido x Entregue'),
       for (var i = 0; i < kit142.length; i++)
@@ -75,7 +75,7 @@ class ConferenciaKitScreen extends StatelessWidget {
             variant: TpVariant.success,
             block: true,
             onPressed: allIn ? s.accept : null),
-        if (!allIn) Muted('Leia as ${5 - got.length} peças restantes para liberar o aceite', size: 13),
+        if (!allIn) const Muted('Confira a Pinça de freio dianteira pela câmera para liberar o aceite', size: 13),
       ],
     ]);
   }

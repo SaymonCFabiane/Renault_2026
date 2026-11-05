@@ -1,5 +1,5 @@
 // Gauge semicircular: trecho c1 até split, c2 depois; ponteiro no valor.
-export default function Gauge({ value, w = 220, label = '', unit = '%', max = 100, split = 0.6, c1 = 'var(--accent)', c2 = 'var(--success)' }) {
+export default function Gauge({ value, w = 220, label = '', unit = '%', max = 100, split = 0.6, c1 = 'var(--data-alt)', c2 = 'var(--success)' }) {
   const cx = w / 2, cy = w * 0.52, r = w * 0.36, sw = w * 0.075;
   const pt = (a) => [cx + r * Math.cos(Math.PI * (1 - a)), cy - r * Math.sin(Math.PI * (1 - a))];
   const arc = (a0, a1, col) => {

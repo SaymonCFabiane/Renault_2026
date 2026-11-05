@@ -9,7 +9,7 @@ export default function Pie({ a, b, la, lb }) {
     <svg className="tp-chart" viewBox="0 0 180 180" style={{ maxWidth: 180 }} role="img" aria-label={`${la} e ${lb}`}>
       <path d={`M${cx},${cy} L${x3},${y3} A${r},${r} 0 ${ang < Math.PI ? 1 : 0} 1 ${x4},${y4} Z`} fill="var(--data)" />
       <path d={`M${cx + off[0]},${cy + off[1]} L${x1},${y1} A${r},${r} 0 ${ang > Math.PI ? 1 : 0} 1 ${x2},${y2} Z`} fill="var(--data-light)" />
-      <text x={lx} y={ly + 5} textAnchor="middle" style={{ fill: '#1E2F38', fontWeight: 800, fontSize: 14 }}>{la}</text>
+      <text x={lx} y={ly + 5} textAnchor="middle" style={{ fill: '#160B3D', fontWeight: 800, fontSize: 14 }}>{la}</text>
       <text x={mx} y={my + 5} textAnchor="middle" style={{ fill: '#fff', fontWeight: 800, fontSize: 14 }}>{lb}</text>
     </svg>
   );

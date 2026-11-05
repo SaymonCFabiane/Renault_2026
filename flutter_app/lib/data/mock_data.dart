@@ -42,7 +42,7 @@ const profiles = <Profile>[
       name: 'Fernanda Rocha',
       initials: 'FR',
       role: 'Técnica',
-      module: 'Testes',
+      module: 'Cliente',
       org: 'Montadora · Oficina de Protótipos',
       icon: LucideIcons.flaskConical,
       first: 'Fernanda'),
@@ -51,7 +51,7 @@ const profiles = <Profile>[
 Profile profileById(String id) => profiles.firstWhere((p) => p.id == id);
 
 /// Telas mobile (códigos do briefing).
-enum Screen { fFunc1, fFunc2, fFunc3, eFunc1, eFunc2, eFunc3, eFunc4, tFunc1, tFunc2 }
+enum Screen { fFunc1, fFunc2, fFunc3, eFunc1, eFunc2, eFunc3, eFunc4, eFunc5, tFunc1, tFunc2 }
 
 class MenuItem {
   const MenuItem(this.screen, this.label, this.icon);
@@ -86,6 +86,7 @@ const screenTitles = <Screen, String>{
   Screen.eFunc2: 'Conferência de recebimento',
   Screen.eFunc3: 'Coleta do KT-0142',
   Screen.eFunc4: 'Expedição de kit',
+  Screen.eFunc5: 'Coleta do KT-0145',
   Screen.tFunc1: 'Kits esperados',
   Screen.tFunc2: 'Conferência do kit',
 };
@@ -97,6 +98,7 @@ const screenHome = <Screen, Screen>{
   Screen.eFunc2: Screen.eFunc1,
   Screen.eFunc3: Screen.eFunc1,
   Screen.eFunc4: Screen.eFunc1,
+  Screen.eFunc5: Screen.eFunc1,
   Screen.tFunc2: Screen.tFunc1,
 };
 
@@ -105,12 +107,12 @@ const protoPickup = 'Pickup Pro – Teste de Frenagem';
 const protoHatch = 'Hatch E-Tech – Teste de Durabilidade';
 
 class KitPart {
-  const KitPart({required this.name, required this.qty, required this.blocking, this.address, this.aisle, this.shelf, this.code, this.missing = false});
+  const KitPart({required this.name, required this.qty, required this.blocking, this.address, this.code, this.missing = false, this.peca});
   final String name;
   final int qty;
   final bool blocking;
-  final String? address, aisle, code;
-  final int? shelf;
+  final String? address, code; // address: endereço logístico Zona-Corredor-Módulo-Nível-Posição
+  final String? peca; // peça que a IA reconhece na câmera (veja pecaDaClasse)
   final bool missing;
 }
 
@@ -119,36 +121,40 @@ const kit142 = <KitPart>[
       name: 'Pinça de freio dianteira',
       qty: 2,
       blocking: true,
-      address: 'Corredor A · Prateleira 02 · Nível 1 · Caixa 04',
-      aisle: 'A',
-      shelf: 2,
+      address: 'A-01-04-01-04',
       code: 'PC-000098'),
   KitPart(
-      name: 'Suporte do motor', qty: 2, blocking: true, address: 'Corredor B · Prateleira 04 · Nível 2 · Caixa 01', aisle: 'B', shelf: 4, code: 'PC-000121'),
+      name: 'Suporte do motor', qty: 2, blocking: true, address: 'A-03-08-02-01', code: 'PC-000121'),
   KitPart(
       name: 'Chicote elétrico do painel',
       qty: 1,
       blocking: true,
-      address: 'Corredor B · Prateleira 07 · Nível 1 · Caixa 02',
-      aisle: 'B',
-      shelf: 7,
+      address: 'A-03-15-01-02',
       code: 'PC-000133'),
-  KitPart(name: 'Módulo de ECU', qty: 1, blocking: true, address: 'Corredor C · Prateleira 01 · Nível 3 · Caixa 05', aisle: 'C', shelf: 1, code: 'PC-000150'),
+  KitPart(name: 'Módulo de ECU', qty: 1, blocking: true, address: 'A-05-02-03-03', code: 'PC-000150'),
   KitPart(
       name: 'Amortecedor traseiro',
       qty: 2,
       blocking: false,
-      address: 'Corredor D · Prateleira 03 · Nível 1 · Caixa 02',
-      aisle: 'D',
-      shelf: 3,
+      address: 'A-07-11-01-02',
       code: 'PC-000164'),
   KitPart(name: 'Farol LED esquerdo', qty: 1, blocking: false, missing: true),
 ];
 
 /// Kits exibidos no app: protótipo, prioridade e nº de itens.
+/// Coleta do KT-0145: as 3 primeiras peças já foram coletadas; Engrenagem e Pinça de freio
+/// são validadas pela câmera (IA), em qualquer ordem.
+const kit145 = <KitPart>[
+  KitPart(name: 'Módulo de ECU', qty: 1, blocking: true, address: 'A-05-02-03-03', code: 'PC-000151'),
+  KitPart(name: 'Amortecedor traseiro', qty: 4, blocking: false, address: 'A-07-11-01-02', code: 'PC-000165'),
+  KitPart(name: 'Sensor de estacionamento', qty: 2, blocking: false, address: 'A-09-03-02-02', code: 'PC-000188'),
+  KitPart(name: 'Engrenagem', qty: 1, blocking: true, address: 'A-04-09-01-02', code: 'PC-000230', peca: 'engrenagem'),
+  KitPart(name: 'Pinça de freio dianteira', qty: 2, blocking: true, address: 'A-01-04-01-04', code: 'PC-000099', peca: 'pinca'),
+];
+
 const kitProto = {'KT-0142': protoSuv, 'KT-0139': protoPickup, 'KT-0145': protoHatch};
 const kitPrio = {'KT-0142': 'Alta', 'KT-0139': 'Alta', 'KT-0145': 'Média'};
-const kitItemCount = {'KT-0142': 6, 'KT-0139': 3, 'KT-0145': 3};
+const kitItemCount = {'KT-0142': 6, 'KT-0139': 3, 'KT-0145': 5};
 
 /// Notificação: [ícone, tom, texto, quando].
 class Note {
@@ -208,20 +214,28 @@ const recvSeq = <ScanRead>[
 ];
 
 /// Conferência do KT-0142 (Fernanda): índice da peça em [kit142].
-class AccRead {
-  const AccRead(this.index, this.ok, [this.msg]);
-  final int index;
-  final bool ok;
-  final String? msg;
+
+/// Endereço logístico: Zona-Corredor-Módulo-Nível-Posição (o mesmo padrão do Mapeamento do Galpão no painel web).
+const guardAddress = 'A-07-16-02-03';
+
+/// "A-07-16-02-03" → "Corredor 07 · Módulo 16 · Nível 02 · Posição 03" (com [zona], começa por "Zona A · ").
+/// Espaço não separável entre rótulo e número, para "Posição 03" não quebrar de linha.
+String descreverEndereco(String end, {bool zona = false}) {
+  final p = end.split('-');
+  return [if (zona) 'Zona\u00A0${p[0]}', 'Corredor\u00A0${p[1]}', 'Módulo\u00A0${p[2]}', 'Nível\u00A0${p[3]}', 'Posição\u00A0${p[4]}'].join(' · ');
 }
 
-const accSeq = <AccRead>[AccRead(0, true), AccRead(1, true), AccRead(1, false, 'Peça repetida'), AccRead(2, true), AccRead(3, true), AccRead(4, true)];
+/// Inspeção de qualidade no recebimento: reprovadas ficam bloqueadas aqui até o gestor decidir.
+const quarentena = 'Q-01-03-01-01'; // Zona Q: quarentena da qualidade (posição da MN-0457)
+const gestorEstoque = 'Ricardo Alves';
+const motivosQualidade = ['Avaria ou trinca', 'Dimensão fora do padrão', 'Acabamento ou pintura', 'Peça errada', 'Outro'];
 
-const guardAddress = 'Corredor D · Prateleira 05 · Nível 2 · Caixa 03';
+/// "Simular inspeção": as mesmas 2 reprovações que o painel web mostra na MN-0457.
+const inspecaoSimulada = {'PC-000203': 'Avaria ou trinca', 'PC-000206': 'Peça errada'};
 
 /// Quem leva o kit até a oficina: [nome, detalhe].
 const carriers = [
-  ['Fernanda Rocha', 'Testes · retira no balcão'],
+  ['Fernanda Rocha', 'Cliente · retira no balcão'],
   ['Transporte interno', 'Carrinho elétrico 03'],
   ['Marcos Souza', 'Eu mesmo levo até a oficina'],
 ];

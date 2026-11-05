@@ -4,6 +4,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../data/mock_data.dart';
 import '../ia/ia_config_sheet.dart';
+import '../ia/ia_leitura.dart';
 import '../ia/ia_mapeamento.dart';
 import '../ia/ia_protocolo.dart';
 import '../ia/ia_servico.dart';
@@ -14,15 +15,17 @@ import 'qr_painter.dart';
 const _okColor = Color(0xFF4FD39A);
 const _badColor = Color(0xFFFF6B5E);
 const _idleColor = Color(0xFFE9F3F7);
-const _caixaColor = Color(0xFFFFB27A);
+const _caixaColor = TpMarca.turquesa;
 
 /// Visor do leitor. Com o servidor de IA, mostra a câmera real com as caixas detectadas;
 /// sem câmera (web, testes) ou com a IA desligada, mostra o visor simulado.
-/// As leituras de QR continuam simuladas nos dois casos.
+/// As leituras de QR continuam simuladas nos dois casos. Com [onPeca], uma peça que fica na câmera
+/// por cerca de 1 segundo vira leitura (recebe a classe detectada, ex.: "Pinça de freio").
 class ScannerView extends StatefulWidget {
-  const ScannerView({super.key, this.last, this.idle = 'Aponte a câmera para o QR Code'});
+  const ScannerView({super.key, this.last, this.idle = 'Aponte a câmera para o QR Code', this.onPeca});
   final ScanRead? last;
   final String idle;
+  final ValueChanged<String>? onPeca;
 
   @override
   State<ScannerView> createState() => _ScannerViewState();
@@ -31,14 +34,19 @@ class ScannerView extends StatefulWidget {
 class _ScannerViewState extends State<ScannerView> with SingleTickerProviderStateMixin {
   late final AnimationController _laser = AnimationController(vsync: this, duration: const Duration(milliseconds: 1800));
   IaServico? _ia;
+  final _estabilizador = EstabilizadorLeitura();
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final ia = IaScope.read(context);
     if (ia != _ia) {
+      _ia?.removeListener(_aoDetectar);
       _ia?.liberar();
-      _ia = ia?..adquirir();
+      _ia = ia
+        ?..adquirir()
+        ..addListener(_aoDetectar);
+      _estabilizador.limpar();
     }
     _sync();
   }
@@ -58,8 +66,16 @@ class _ScannerViewState extends State<ScannerView> with SingleTickerProviderStat
     }
   }
 
+  void _aoDetectar() {
+    final ia = _ia, onPeca = widget.onPeca;
+    if (ia == null || onPeca == null || ia.estado != IaEstado.conectada) return;
+    final classe = _estabilizador.alimentar(ia.deteccoes, DateTime.now());
+    if (classe != null) onPeca(classe);
+  }
+
   @override
   void dispose() {
+    _ia?.removeListener(_aoDetectar);
     _ia?.liberar();
     _laser.dispose();
     super.dispose();
@@ -84,7 +100,7 @@ class _ScannerViewState extends State<ScannerView> with SingleTickerProviderStat
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(TpRadius.radiusCard),
-            gradient: const RadialGradient(center: Alignment(0, -.1), radius: .9, colors: [Color(0xFF23404D), Color(0xFF0D1A20)]),
+            gradient: const RadialGradient(center: Alignment(0, -.1), radius: .9, colors: [Color(0xFF2A1670), Color(0xFF0B0620)]),
           ),
           foregroundDecoration:
               last == null ? null : BoxDecoration(borderRadius: BorderRadius.circular(TpRadius.radiusCard), border: Border.all(color: color, width: 4)),
@@ -119,9 +135,9 @@ class _ScannerViewState extends State<ScannerView> with SingleTickerProviderStat
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(color: const Color(0x66000000), borderRadius: BorderRadius.circular(TpRadius.radiusPill)),
                     child: Row(mainAxisSize: MainAxisSize.min, children: [
-                      const Icon(LucideIcons.volume2, size: 14, color: Color(0xFFCFE3EC)),
+                      const Icon(LucideIcons.volume2, size: 14, color: TpMarca.lavanda),
                       const SizedBox(width: 4),
-                      Text(last.ok ? 'bipe' : 'bipe duplo', style: const TextStyle(color: Color(0xFFCFE3EC), fontSize: 11, fontWeight: FontWeight.w700)),
+                      Text(last.ok ? 'bipe' : 'bipe duplo', style: const TextStyle(color: TpMarca.lavanda, fontSize: 11, fontWeight: FontWeight.w700)),
                     ]),
                   ),
                 ),
@@ -232,7 +248,7 @@ class _CaixasPainter extends CustomPainter {
       final tp = TextPainter(
         text: TextSpan(
           text: '${rotuloClasse(d.classe)} ${(d.confianca * 100).round()}%',
-          style: const TextStyle(color: Color(0xFF1E2F38), fontSize: 12, fontWeight: FontWeight.w800, fontFamily: 'Nunito'),
+          style: const TextStyle(color: TpMarca.noite, fontSize: 12, fontWeight: FontWeight.w800, fontFamily: 'Nunito'),
         ),
         textDirection: TextDirection.ltr,
         maxLines: 1,

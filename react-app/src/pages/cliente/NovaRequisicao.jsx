@@ -18,7 +18,7 @@ function CatalogResults({ S, act }) {
     return (
       <div key={c[0]} className="tp-result">
         <div className="tp-iconbox tp-iconbox--data" style={{ width: 40, height: 40 }}><Icon name="package" /></div>
-        <div className="t"><b>{c[0]}</b><span>{c[1]} · padrão {c[2] ? 'BLOCANTE' : 'NÃO-BLOCANTE'}</span></div>
+        <div className="t"><b>{c[0]}</b><span>{c[1]}</span></div>
         <Button size="sm" variant={inKit ? 'secondary' : 'outline'} icon={inKit ? 'check' : 'plus'} disabled={inKit} onClick={() => act('addItem', c[0])}>{inKit ? 'No kit' : 'Adicionar ao kit'}</Button>
       </div>
     );
@@ -88,10 +88,17 @@ export default function NovaRequisicao() {
             ) : (
               <EmptyState icon="boxes" title="Nenhuma peça no kit">Adicione peças pelo catálogo ao lado.</EmptyState>
             )}
-            <label className="tp-check">
-              <input type="checkbox" checked={r.partial} onChange={(e) => act('partial', e.target.checked)} />
-              <span>Autorizar envio de Kit Parcial se faltarem apenas peças não-blocantes</span>
-            </label>
+            {r.items.length > 0 && <p className="tp-cap" style={{ margin: 0 }}>Todas as peças entram como NÃO-BLOCANTE. Ligue BLOCANTE só nas peças sem as quais o teste não acontece.</p>}
+            <div>
+              <div className="tp-label">Entregas parciais</div>
+              <Segmented label="Entregas parciais" value={r.partial ? 'sim' : 'nao'} onChange={(v) => act('partial', v === 'sim')}
+                items={[{ value: 'sim', label: 'Aceitar', icon: 'check' }, { value: 'nao', label: 'Não aceitar', icon: 'x' }]} />
+              <p className="tp-cap" style={{ margin: '6px 0 0' }}>
+                {r.partial
+                  ? 'Se faltar só peça NÃO-BLOCANTE, o Estoque envia o que já tem e o restante chega depois.'
+                  : 'O kit só sai do Estoque com todas as peças, mesmo que isso atrase a entrega.'}
+              </p>
+            </div>
             <div>
               <div className="tp-label">Prioridade</div>
               <Segmented className="tp-seg--prio" label="Prioridade" value={r.prio} onChange={(v) => act('reqPrio', v)}

@@ -30,7 +30,7 @@ class KitItem extends StatelessWidget {
     final (Color bg, Color border, Color icBg, Color icFg, IconData ic) = switch (state) {
       KitItemState.done => (c.successBg, Colors.transparent, c.success, c.onStatus, LucideIcons.check),
       KitItemState.current => (c.surface, c.primary, c.primary, c.onPrimary, LucideIcons.hand),
-      KitItemState.missing => (c.warningBg, c.warning, c.warning, const Color(0xFF1E2F38), LucideIcons.triangleAlert),
+      KitItemState.missing => (c.warningBg, c.warning, c.warning, TpMarca.noite, LucideIcons.triangleAlert),
       KitItemState.locked => (c.surface, c.line, c.surfaceMuted, c.textSecondary, LucideIcons.lock),
       KitItemState.pending => (
           c.surface,
